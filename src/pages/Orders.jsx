@@ -361,7 +361,7 @@ const Orders = () => {
                         {order.orderItems.slice(0, 3).map((item, index) => (
                           <img
                             key={index}
-                            src={item.image ? `${import.meta.env.VITE_UPLOADS_URL}/${item.image}` : 'https://via.placeholder.com/60'}
+                            src={item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_UPLOADS_URL}/${item.image}`) : 'https://placehold.co/60'}
                             alt={item.name}
                             style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                             className="rounded"

@@ -5,6 +5,8 @@ import API from '../api/axios';
 import Loading from '../components/Loading';
 import './AdminLayout.css';
 
+const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL;
+
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,52 +20,13 @@ const ManageProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      // Mock data for now - replace with actual API call
-      const mockProducts = [
-        {
-          _id: '1',
-          name: 'Laptop Pro 15"',
-          description: 'High-performance laptop with 16GB RAM and 512GB SSD',
-          price: 89999,
-          category: 'Electronics',
-          countInStock: 45,
-          isActive: true,
-          image: '/images/laptop.jpg'
-        },
-        {
-          _id: '2',
-          name: 'Wireless Mouse',
-          description: 'Ergonomic wireless mouse with long battery life',
-          price: 1299,
-          category: 'Electronics',
-          countInStock: 234,
-          isActive: true,
-          image: '/images/mouse.jpg'
-        },
-        {
-          _id: '3',
-          name: 'Gaming Keyboard',
-          description: 'Mechanical gaming keyboard with RGB lighting',
-          price: 4999,
-          category: 'Electronics',
-          countInStock: 12,
-          isActive: true,
-          image: '/images/keyboard.jpg'
-        },
-        {
-          _id: '4',
-          name: 'Monitor 4K',
-          description: '27-inch 4K monitor with HDR support',
-          price: 24999,
-          category: 'Electronics',
-          countInStock: 8,
-          isActive: true,
-          image: '/images/monitor.jpg'
-        }
-      ];
-      setProducts(mockProducts);
+      setLoading(true);
+      const { data } = await API.get('/products?limit=1000'); // Fetch all products
+      setProducts(data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      // Fallback to empty array on error
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -158,7 +121,11 @@ const ManageProducts = () => {
                         <div className="product-image me-3" style={{ width: '50px', height: '50px' }}>
                           {product.image ? (
                             <img 
-                              src={product.image} 
+                              src={
+                                product.image 
+                                  ? (product.image.startsWith('http') ? product.image : `${UPLOADS_URL}/${product.image}`) 
+                                  : 'https://placehold.co/50'
+                              } 
                               alt={product.name}
                               className="img-fluid rounded"
                               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
@@ -176,7 +143,9 @@ const ManageProducts = () => {
                       </div>
                     </td>
                     <td>
-                      <span className="badge bg-info">{product.category}</span>
+                      <span className="badge bg-info">
+                        {typeof product.category === 'object' ? product.category.name : product.category}
+                      </span>
                     </td>
                     <td>
                       <div className="d-flex align-items-center">
@@ -185,13 +154,13 @@ const ManageProducts = () => {
                       </div>
                     </td>
                     <td>
-                      <span className={`badge ${(product.countInStock || 0) > 10 ? 'bg-success' : (product.countInStock || 0) > 5 ? 'bg-warning' : 'bg-danger'}`}>
-                        {product.countInStock || 0} units
+                      <span className={`badge ${(product.stock || 0) > 10 ? 'bg-success' : (product.stock || 0) > 5 ? 'bg-warning' : 'bg-danger'}`}>
+                        {product.stock || 0} units
                       </span>
                     </td>
                     <td>
-                      <span className={`badge ${product.isActive ? 'bg-success' : 'bg-secondary'}`}>
-                        {product.isActive ? 'Active' : 'Inactive'}
+                      <span className={`badge ${product.stock > 0 ? 'bg-success' : 'bg-secondary'}`}>
+                        {product.stock > 0 ? 'Active' : 'Out of Stock'}
                       </span>
                     </td>
                     <td>

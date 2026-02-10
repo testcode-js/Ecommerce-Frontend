@@ -31,7 +31,7 @@ const ViewDeal = () => {
         dealPrice: 499.99,
         category: 'electronics',
         status: 'active',
-        featuredImage: 'https://via.placeholder.com/800x400',
+        featuredImage: 'https://placehold.co/800x400',
         startDate: '2024-01-15T00:00:00',
         endDate: '2024-01-31T23:59:59',
         maxUsage: 100,

@@ -19,53 +19,8 @@ const ManageBlogs = () => {
 
   const fetchBlogs = async () => {
     try {
-      // Mock data for now - replace with actual API call
-      const mockBlogs = [
-        {
-          _id: '1',
-          title: 'Getting Started with React Development',
-          excerpt: 'Learn the basics of React and start building modern web applications with this comprehensive guide.',
-          author: 'John Doe',
-          category: 'Technology',
-          tags: ['react', 'javascript', 'web development'],
-          status: 'published',
-          featuredImage: 'https://via.placeholder.com/300x200',
-          createdAt: '2024-01-15',
-          publishDate: '2024-01-16',
-          views: 1250,
-          likes: 45
-        },
-        {
-          _id: '2',
-          title: '10 Fashion Trends for 2024',
-          excerpt: 'Discover the hottest fashion trends that will dominate the year 2024.',
-          author: 'Jane Smith',
-          category: 'Fashion',
-          tags: ['fashion', 'trends', '2024'],
-          status: 'published',
-          featuredImage: 'https://via.placeholder.com/300x200',
-          createdAt: '2024-01-10',
-          publishDate: '2024-01-12',
-          views: 890,
-          likes: 32
-        },
-        {
-          _id: '3',
-          title: 'Healthy Eating Habits for Busy Professionals',
-          excerpt: 'Simple and effective nutrition tips for professionals with busy schedules.',
-          author: 'Dr. Sarah Johnson',
-          category: 'Health',
-          tags: ['health', 'nutrition', 'lifestyle'],
-          status: 'draft',
-          featuredImage: 'https://via.placeholder.com/300x200',
-          createdAt: '2024-01-08',
-          publishDate: '',
-          views: 0,
-          likes: 0
-        }
-      ];
-      
-      setBlogs(mockBlogs);
+      const response = await API.get('/blogs');
+      setBlogs(response.data?.blogs || []);
     } catch (error) {
       console.error('Error fetching blogs:', error);
     } finally {
@@ -76,10 +31,8 @@ const ManageBlogs = () => {
   const handleDelete = async (blogId) => {
     if (window.confirm('Are you sure you want to delete this blog post?')) {
       try {
-        // Mock API call - replace with actual API
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await API.delete(`/blogs/${blogId}`);
         setBlogs(blogs.filter(blog => blog._id !== blogId));
-        console.log('Blog deleted:', blogId);
       } catch (error) {
         console.error('Error deleting blog:', error);
       }
@@ -89,12 +42,10 @@ const ManageBlogs = () => {
   const handleStatusToggle = async (blogId, currentStatus) => {
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     try {
-      // Mock API call - replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setBlogs(blogs.map(blog => 
+      await API.put(`/blogs/${blogId}`, { status: newStatus });
+      setBlogs(blogs.map(blog =>
         blog._id === blogId ? { ...blog, status: newStatus } : blog
       ));
-      console.log('Blog status updated:', blogId, newStatus);
     } catch (error) {
       console.error('Error updating blog status:', error);
     }

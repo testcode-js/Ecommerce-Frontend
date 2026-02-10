@@ -31,6 +31,8 @@ import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
 import Loading from '../components/Loading';
 import Button from '../components/Button';
+import CloudinaryUpload from '../components/CloudinaryUpload';
+import useCloudinary from '../hooks/useCloudinary';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -87,6 +89,9 @@ const Profile = () => {
   const [addresses, setAddresses] = useState([]);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+  const [showAvatarUpload, setShowAvatarUpload] = useState(false);
+  
+  const { uploadUserAvatar } = useCloudinary();
 
   useEffect(() => {
     if (user) {
@@ -180,6 +185,29 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarUpload = async (result) => {
+    try {
+      setLoading(true);
+      const avatarUrl = result.data.url;
+      
+      // Update user profile with new avatar
+      const { data } = await API.put('/users/profile', { avatar: avatarUrl });
+      updateUserData(data);
+      
+      setMessage({ type: 'success', text: 'Avatar updated successfully!' });
+      setShowAvatarUpload(false);
+    } catch (err) {
+      setMessage({ type: 'danger', text: err.response?.data?.message || 'Failed to update avatar' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAvatarUploadError = (error) => {
+    setMessage({ type: 'danger', text: `Upload failed: ${error}` });
+    setShowAvatarUpload(false);
+  };
+
   if (!user) return <Loading message="Loading profile..." />;
 
   return (
@@ -270,6 +298,51 @@ const Profile = () => {
               </h5>
             </div>
             <div className="card-body">
+              {/* Avatar Upload Section */}
+              <div className="text-center mb-4">
+                <div className="position-relative d-inline-block">
+                  <img
+                    src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}&background=0d6efd&color=fff&size=128`}
+                    alt="Profile Avatar"
+                    className="rounded-circle"
+                    style={{ width: '128px', height: '128px', objectFit: 'cover', border: '4px solid #0d6efd' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle"
+                    onClick={() => setShowAvatarUpload(!showAvatarUpload)}
+                    style={{ width: '36px', height: '36px' }}
+                  >
+                    <FaCamera />
+                  </button>
+                </div>
+                <p className="mt-2 mb-0 text-muted">Click camera to change avatar</p>
+              </div>
+
+              {/* Avatar Upload Component */}
+              {showAvatarUpload && (
+                <div className="mb-4 p-3 border rounded">
+                  <h6 className="mb-3">Upload New Avatar</h6>
+                  <CloudinaryUpload
+                    onUploadSuccess={handleAvatarUpload}
+                    onUploadError={handleAvatarUploadError}
+                    multiple={false}
+                    accept="image/*"
+                    maxSize={2 * 1024 * 1024} // 2MB
+                    folder={`ecommerce/users/${user._id}/avatar`}
+                    buttonText="Choose Avatar"
+                    showPreview={true}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm mt-2"
+                    onClick={() => setShowAvatarUpload(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
               <form onSubmit={handleProfileUpdate}>
                 <div className="mb-3">
                   <label className="form-label">Full Name</label>

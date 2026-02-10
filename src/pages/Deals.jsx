@@ -156,7 +156,7 @@ const Deals = () => {
                   <Link to={`/product/${deal._id}`} className="deal-image-link">
                     <div className="deal-image">
                       <img
-                        src={deal.featuredImage ? `${import.meta.env.VITE_UPLOADS_URL}/${deal.featuredImage}` : 'https://via.placeholder.com/300'}
+                        src={deal.featuredImage ? (deal.featuredImage.startsWith('http') ? deal.featuredImage : `${import.meta.env.VITE_UPLOADS_URL}/${deal.featuredImage}`) : 'https://placehold.co/300'}
                         alt={deal.title}
                       />
                       <div className="deal-overlay">

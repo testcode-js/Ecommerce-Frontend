@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBox, FaShoppingCart, FaUsers, FaTags, FaRupeeSign, FaChartLine, FaEye, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaBox, FaShoppingCart, FaUsers, FaTags, FaRupeeSign, FaChartLine, FaEye, FaBook, FaExclamationTriangle, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
 import './AdminLayout.css';
@@ -13,6 +13,8 @@ const AdminDashboard = () => {
     totalRevenue: 0,
     pendingOrders: 0,
     lowStockProducts: 0,
+    totalBlogs: 0,
+    activeDeals: 0,
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,25 +22,70 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [productsRes, ordersRes] = await Promise.all([
+        const [productsRes, ordersRes, usersRes, blogsRes, dealsRes] = await Promise.all([
           API.get('/products'),
           API.get('/orders'),
+          API.get('/users'),
+          API.get('/blogs'),
+          API.get('/deals'),
         ]);
 
         const products = productsRes.data.products || [];
         const orders = ordersRes.data || [];
+        const users = usersRes.data || [];
+        const blogs = blogsRes.data?.blogs || [];
+        const deals = dealsRes.data?.deals || [];
+
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
         const totalRevenue = orders.reduce((acc, order) => acc + (order.totalPrice || 0), 0);
         const pendingOrders = orders.filter(order => order.status === 'pending').length;
         const lowStockProducts = products.filter(product => (product.countInStock || 0) < 5).length;
+        const activeDeals = deals.filter(deal => deal.status === 'active').length;
+
+        const currentMonthOrders = orders.filter(order => new Date(order.createdAt) >= currentMonthStart).length;
+        const lastMonthOrders = orders.filter(order => {
+          const date = new Date(order.createdAt);
+          return date >= lastMonthStart && date <= lastMonthEnd;
+        }).length;
+        const orderChange = lastMonthOrders > 0 ? Math.round(((currentMonthOrders - lastMonthOrders) / lastMonthOrders) * 100) : 0;
+
+        const currentMonthRevenue = orders
+          .filter(order => new Date(order.createdAt) >= currentMonthStart)
+          .reduce((acc, order) => acc + (order.totalPrice || 0), 0);
+        const lastMonthRevenue = orders
+          .filter(order => {
+            const date = new Date(order.createdAt);
+            return date >= lastMonthStart && date <= lastMonthEnd;
+          })
+          .reduce((acc, order) => acc + (order.totalPrice || 0), 0);
+        const revenueChange = lastMonthRevenue > 0 ? Math.round(((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100) : 0;
+
+        const currentMonthUsers = users.filter(user => new Date(user.createdAt) >= currentMonthStart).length;
+        const lastMonthUsers = users.filter(user => {
+          const date = new Date(user.createdAt);
+          return date >= lastMonthStart && date <= lastMonthEnd;
+        }).length;
+        const userChange = lastMonthUsers > 0 ? Math.round(((currentMonthUsers - lastMonthUsers) / lastMonthUsers) * 100) : 0;
+
+        const pendingChange = orders.filter(order => order.status === 'pending').length;
 
         setStats({
           totalProducts: products.length,
           totalOrders: orders.length,
-          totalUsers: 1, // This would come from users API
+          totalUsers: users.length,
           totalRevenue,
           pendingOrders,
           lowStockProducts,
+          totalBlogs: blogs.length,
+          activeDeals,
+          orderChange,
+          revenueChange,
+          userChange,
+          pendingChange,
         });
 
         setRecentOrders(orders.slice(0, 5));
@@ -62,48 +109,64 @@ const AdminDashboard = () => {
       value: stats.totalProducts,
       icon: FaBox,
       color: 'primary',
-      change: '+12%',
-      changeType: 'increase'
+      link: '/admin/products',
+      change: null,
     },
     {
       title: 'Total Orders',
       value: stats.totalOrders,
       icon: FaShoppingCart,
       color: 'success',
-      change: '+8%',
-      changeType: 'increase'
+      link: '/admin/orders',
+      change: stats.orderChange,
     },
     {
       title: 'Total Users',
       value: stats.totalUsers,
       icon: FaUsers,
       color: 'warning',
-      change: '+15%',
-      changeType: 'increase'
+      link: '/admin/users',
+      change: stats.userChange,
     },
     {
       title: 'Total Revenue',
       value: `₹${stats.totalRevenue.toFixed(2)}`,
       icon: FaRupeeSign,
       color: 'info',
-      change: '+23%',
-      changeType: 'increase'
+      link: '/admin/orders',
+      change: stats.revenueChange,
     },
     {
       title: 'Pending Orders',
       value: stats.pendingOrders,
       icon: FaChartLine,
       color: 'danger',
-      change: '-5%',
-      changeType: 'decrease'
+      link: '/admin/orders',
+      change: null,
     },
     {
-      title: 'Low Stock Products',
-      value: stats.lowStockProducts,
+      title: 'Active Deals',
+      value: stats.activeDeals,
       icon: FaTags,
       color: 'warning',
-      change: '+2',
-      changeType: 'increase'
+      link: '/admin/deals',
+      change: null,
+    },
+    {
+      title: 'Total Blogs',
+      value: stats.totalBlogs,
+      icon: FaBook,
+      color: 'primary',
+      link: '/admin/blogs',
+      change: null,
+    },
+    {
+      title: 'Low Stock',
+      value: stats.lowStockProducts,
+      icon: FaExclamationTriangle,
+      color: 'danger',
+      link: '/admin/products',
+      change: null,
     }
   ];
 
@@ -111,22 +174,26 @@ const AdminDashboard = () => {
     <div className="admin-dashboard">
       <div className="row mb-4">
         {statCards.map((stat, index) => (
-          <div key={index} className="col-lg-4 col-md-6 mb-4">
-            <div className={`stat-card ${stat.color}`}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-2">{stat.title}</h6>
-                  <h3 className="mb-0">{stat.value}</h3>
-                  <div className={`d-flex align-items-center mt-2 ${stat.changeType === 'increase' ? 'text-success' : 'text-danger'}`}>
-                    {stat.changeType === 'increase' ? <FaArrowUp className="me-1" /> : <FaArrowDown className="me-1" />}
-                    <small>{stat.change}</small>
+          <div key={index} className="col-lg-3 col-md-6 mb-4">
+            <Link to={stat.link} className="text-decoration-none">
+              <div className={`stat-card ${stat.color}`}>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="text-muted mb-2">{stat.title}</h6>
+                    <h3 className="mb-0">{stat.value}</h3>
+                    {stat.change !== null && (
+                      <div className={`d-flex align-items-center mt-2 ${stat.change >= 0 ? 'text-success' : 'text-danger'}`}>
+                        {stat.change >= 0 ? <FaArrowUp className="me-1" /> : <FaArrowDown className="me-1" />}
+                        <small>{stat.change >= 0 ? '+' : ''}{stat.change}% vs last month</small>
+                      </div>
+                    )}
+                  </div>
+                  <div className={`stat-icon ${stat.color}`}>
+                    <stat.icon />
                   </div>
                 </div>
-                <div className={`stat-icon ${stat.color}`}>
-                  <stat.icon />
-                </div>
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </div>

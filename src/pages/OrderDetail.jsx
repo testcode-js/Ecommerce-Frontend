@@ -251,7 +251,7 @@ const OrderDetail = () => {
               {order.orderItems.map((item, index) => (
                 <div key={index} className="d-flex align-items-center mb-3 pb-3 border-bottom">
                   <img
-                    src={item.image ? `${UPLOADS_URL}/${item.image}` : 'https://via.placeholder.com/80'}
+                    src={item.image ? (item.image.startsWith('http') ? item.image : `${UPLOADS_URL}/${item.image}`) : 'https://placehold.co/80'}
                     alt={item.name}
                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                     className="rounded me-3"

@@ -3,6 +3,8 @@ import { FaPlus, FaEdit, FaTrash, FaBox, FaStar } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
 import Button from '../components/Button';
+import CloudinaryUpload from '../components/CloudinaryUpload';
+import useCloudinary from '../hooks/useCloudinary';
 
 const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL;
 
@@ -18,14 +20,19 @@ const AddProduct = () => {
     stock: '',
     isFeatured: false,
   });
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [mainImage, setMainImage] = useState(null);
+  const [mainImagePreview, setMainImagePreview] = useState(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [useCloudinaryUpload, setUseCloudinaryUpload] = useState(true);
+  
+  const { uploadProductImage, uploadMultipleFiles } = useCloudinary();
 
   const fetchCategories = async () => {
     try {
@@ -53,29 +60,52 @@ const AddProduct = () => {
   }, []);
 
   const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-
-    if (imagePreview && typeof imagePreview === 'string' && imagePreview.startsWith('blob:')) {
-      URL.revokeObjectURL(imagePreview);
+    const files = Array.from(e.target.files || []);
+    
+    if (mainImagePreview && typeof mainImagePreview === 'string' && mainImagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(mainImagePreview);
     }
+    
+    // Clear old previews
+    imagePreviews.forEach(preview => {
+      if (preview && typeof preview === 'string' && preview.startsWith('blob:')) {
+        URL.revokeObjectURL(preview);
+      }
+    });
 
-    setImage(file || null);
+    setMainImage(files[0] || null);
+    setImages(files.slice(1) || []);
     setRemoveImage(false);
 
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
+    if (files[0]) {
+      setMainImagePreview(URL.createObjectURL(files[0]));
     } else {
-      setImagePreview(null);
+      setMainImagePreview(null);
+    }
+
+    if (files.length > 1) {
+      const newPreviews = files.slice(1).map(file => URL.createObjectURL(file));
+      setImagePreviews(newPreviews);
+    } else {
+      setImagePreviews([]);
     }
   };
 
   const handleRemoveImage = () => {
-    if (imagePreview && typeof imagePreview === 'string' && imagePreview.startsWith('blob:')) {
-      URL.revokeObjectURL(imagePreview);
+    if (mainImagePreview && typeof mainImagePreview === 'string' && mainImagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(mainImagePreview);
     }
+    
+    imagePreviews.forEach(preview => {
+      if (preview && typeof preview === 'string' && preview.startsWith('blob:')) {
+        URL.revokeObjectURL(preview);
+      }
+    });
 
-    setImage(null);
-    setImagePreview(null);
+    setMainImage(null);
+    setImages([]);
+    setMainImagePreview(null);
+    setImagePreviews([]);
     setRemoveImage(true);
 
     if (fileInputRef.current) {
@@ -83,13 +113,31 @@ const AddProduct = () => {
     }
   };
 
+  const handleRemoveAdditionalImage = (index) => {
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    
+    // Revoke the blob URL for the removed image
+    if (imagePreviews[index] && typeof imagePreviews[index] === 'string' && imagePreviews[index].startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreviews[index]);
+    }
+    
+    setImages(newImages);
+    setImagePreviews(newPreviews);
+  };
+
   useEffect(() => {
     return () => {
-      if (imagePreview && typeof imagePreview === 'string' && imagePreview.startsWith('blob:')) {
-        URL.revokeObjectURL(imagePreview);
+      if (mainImagePreview && typeof mainImagePreview === 'string' && mainImagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(mainImagePreview);
       }
+      imagePreviews.forEach(preview => {
+        if (preview && typeof preview === 'string' && preview.startsWith('blob:')) {
+          URL.revokeObjectURL(preview);
+        }
+      });
     };
-  }, [imagePreview]);
+  }, [mainImagePreview, imagePreviews]);
 
   const resetForm = () => {
     setForm({
@@ -102,8 +150,10 @@ const AddProduct = () => {
       stock: '',
       isFeatured: false,
     });
-    setImage(null);
-    setImagePreview(null);
+    setMainImage(null);
+    setImages([]);
+    setMainImagePreview(null);
+    setImagePreviews([]);
     setRemoveImage(false);
     setEditingId(null);
 
@@ -116,30 +166,98 @@ const AddProduct = () => {
     e.preventDefault();
     setSubmitting(true);
 
-    const formData = new FormData();
-    formData.append('name', form.name);
-    formData.append('price', form.price);
-    if (form.originalPrice) formData.append('originalPrice', form.originalPrice);
-    formData.append('description', form.description);
-    formData.append('category', form.category);
-    formData.append('brand', form.brand);
-    formData.append('stock', form.stock || 0);
-    formData.append('isFeatured', form.isFeatured);
-    if (image) formData.append('image', image);
-    if (editingId && removeImage && !image) formData.append('removeImage', 'true');
-
     try {
+      let mainImageUrl = null;
+      let additionalImageUrls = [];
+      
+      // Handle main image upload
+      if (mainImage) {
+        if (typeof mainImage === 'string' && mainImage.startsWith('http')) {
+           // It's already a URL (e.g. from existing product or direct set)
+           mainImageUrl = mainImage;
+        } else if (mainImage.secure_url || mainImage.url) {
+           // It's a Cloudinary result object
+           mainImageUrl = mainImage.secure_url || mainImage.url;
+        } else if (mainImage.data && (mainImage.data.secure_url || mainImage.data.url)) {
+           // It's a wrapped Cloudinary result
+           mainImageUrl = mainImage.data.secure_url || mainImage.data.url;
+        } else if (useCloudinaryUpload && mainImage instanceof File) {
+             // File object in Cloudinary mode - try to upload if not already
+             const tempProductId = editingId || 'temp-' + Date.now();
+             try {
+                const uploadResult = await uploadProductImage(mainImage, tempProductId);
+                const resultData = uploadResult.data || uploadResult;
+                mainImageUrl = resultData.secure_url || resultData.url;
+             } catch (uploadErr) {
+                console.error('Failed to upload main image fallback:', uploadErr);
+             }
+        } else if (!useCloudinaryUpload && mainImage instanceof File) {
+           // Traditional upload
+           const formData = new FormData();
+           formData.append('image', mainImage);
+           const uploadResponse = await API.post('/cloudinary/upload', formData, {
+             headers: { 'Content-Type': 'multipart/form-data' },
+           });
+           mainImageUrl = uploadResponse.data.data.url;
+        }
+      }
+
+      // Handle additional images upload
+      if (images.length > 0) {
+          const processedImages = await Promise.all(images.map(async (img) => {
+              if (typeof img === 'string' && img.startsWith('http')) return img;
+              if (img.secure_url || img.url) return img.secure_url || img.url;
+              if (img.data && (img.data.secure_url || img.data.url)) return img.data.secure_url || img.data.url;
+              
+              if (!useCloudinaryUpload && img instanceof File) {
+                  const formData = new FormData();
+                  formData.append('images', img);
+                  // We'd need a single file upload endpoint or handle bulk differently
+                  // For now assuming existing logic for bulk:
+                  return null; 
+              }
+              return null;
+          }));
+
+          // If using traditional bulk upload for Files
+          const filesToUpload = images.filter(img => img instanceof File && !useCloudinaryUpload);
+          if (filesToUpload.length > 0) {
+              const formData = new FormData();
+              filesToUpload.forEach((image) => {
+                formData.append(`images`, image);
+              });
+              const uploadResponse = await API.post('/cloudinary/upload-multiple', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+              });
+              const uploadedUrls = uploadResponse.data.data.files.map(file => file.url);
+              additionalImageUrls = [...processedImages.filter(Boolean), ...uploadedUrls];
+          } else {
+              additionalImageUrls = processedImages.filter(Boolean);
+          }
+      }
+
+      // Prepare product data
+      const productData = {
+        name: form.name,
+        price: form.price,
+        originalPrice: form.originalPrice,
+        description: form.description,
+        category: form.category,
+        brand: form.brand,
+        stock: form.stock || 0,
+        isFeatured: form.isFeatured,
+        image: mainImageUrl,
+        images: additionalImageUrls
+      };
+
       if (editingId) {
-        await API.put(`/products/${editingId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await API.put(`/products/${editingId}`, productData);
         alert('Product updated successfully');
       } else {
-        await API.post('/products', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await API.post('/products', productData);
         alert('Product added successfully');
       }
+      
       resetForm();
       fetchProducts();
     } catch (err) {
@@ -147,6 +265,34 @@ const AddProduct = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCloudinaryUploadSuccess = (result) => {
+    // Handle single image upload (for main image)
+    if (result.data && !Array.isArray(result.data)) {
+      const url = result.data.secure_url || result.data.url;
+      setMainImage(url);
+      setMainImagePreview(url);
+    }
+    setRemoveImage(false);
+  };
+
+  const handleMultipleCloudinaryUploadSuccess = (result) => {
+    // Handle multiple images upload
+    if (result.data && result.data.files && Array.isArray(result.data.files)) {
+      const newImages = result.data.files.map(file => ({
+        file: null, // We'll need to handle this differently
+        url: file.secure_url || file.url,
+        publicId: file.publicId
+      }));
+      setImages(prev => [...prev, ...newImages]);
+      const newPreviews = result.data.files.map(file => file.url);
+      setImagePreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
+  const handleCloudinaryUploadError = (error) => {
+    alert(`Upload failed: ${error}`);
   };
 
   const handleEdit = (product) => {
@@ -161,8 +307,10 @@ const AddProduct = () => {
       isFeatured: product.isFeatured || false,
     });
     setEditingId(product._id);
-    setImage(null);
-    setImagePreview(product.image ? `${UPLOADS_URL}/${product.image}` : null);
+    setMainImage(product.image || null);
+    setImages(product.images || []);
+    setMainImagePreview(product.image ? (product.image.startsWith('http') ? product.image : `${UPLOADS_URL}/${product.image}`) : null);
+    setImagePreviews(product.images && product.images.length > 0 ? product.images.map(img => img.startsWith('http') ? img : `${UPLOADS_URL}/${img}`) : []);
     setRemoveImage(false);
 
     if (fileInputRef.current) {
@@ -205,21 +353,120 @@ const AddProduct = () => {
             <div className="card-body">
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label className="form-label">Product Image {editingId && '(optional)'}</label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    {...(!editingId && { required: true })}
-                  />
-                  {imagePreview && (
-                    <div className="mt-2 d-flex align-items-start gap-2">
-                      <img src={imagePreview} alt="Preview" className="img-thumbnail" style={{ height: '100px' }} />
-                      <button type="button" className="btn btn-sm btn-outline-danger" onClick={handleRemoveImage}>
-                        Remove
-                      </button>
+                  <label className="form-label">Product Images {editingId && '(optional)'}</label>
+                  
+                  {/* Upload Method Toggle */}
+                  <div className="btn-group w-100 mb-2" role="group">
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="uploadMethod"
+                      id="cloudinaryMethod"
+                      checked={useCloudinaryUpload}
+                      onChange={() => setUseCloudinaryUpload(true)}
+                    />
+                    <label className="btn btn-outline-primary" htmlFor="cloudinaryMethod">
+                      Cloudinary Upload
+                    </label>
+                    
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="uploadMethod"
+                      id="traditionalMethod"
+                      checked={!useCloudinaryUpload}
+                      onChange={() => setUseCloudinaryUpload(false)}
+                    />
+                    <label className="btn btn-outline-secondary" htmlFor="traditionalMethod">
+                      Traditional Upload
+                    </label>
+                  </div>
+
+                  {useCloudinaryUpload ? (
+                    /* Cloudinary Upload Components */
+                    <div className="space-y-3">
+                      {/* Main Image Upload */}
+                      <div>
+                        <h6 className="mb-2">Main Image (First image will be used as thumbnail)</h6>
+                        <CloudinaryUpload
+                          onUploadSuccess={handleCloudinaryUploadSuccess}
+                          onUploadError={handleCloudinaryUploadError}
+                          multiple={false}
+                          accept="image/*"
+                          maxSize={5 * 1024 * 1024} // 5MB
+                          folder="ecommerce/products"
+                          buttonText="Choose Main Image"
+                          showPreview={false}
+                        />
+                      </div>
+                      
+                      {/* Additional Images Upload */}
+                      <div>
+                        <h6 className="mb-2">Additional Images</h6>
+                        <CloudinaryUpload
+                          onUploadSuccess={handleMultipleCloudinaryUploadSuccess}
+                          onUploadError={handleCloudinaryUploadError}
+                          multiple={true}
+                          accept="image/*"
+                          maxSize={5 * 1024 * 1024} // 5MB
+                          folder="ecommerce/products"
+                          buttonText="Choose Additional Images"
+                          showPreview={false}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* Traditional File Input */
+                    <input
+                      type="file"
+                      className="form-control"
+                      ref={fileInputRef}
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      multiple
+                      {...(!editingId && { required: true })}
+                    />
+                  )}
+
+                  {/* Main Image Preview */}
+                  {mainImagePreview && (
+                    <div className="mt-3">
+                      <h6>Main Image</h6>
+                      <div className="d-flex align-items-start gap-2">
+                        <img src={mainImagePreview} alt="Main preview" className="img-thumbnail" style={{ height: '120px' }} />
+                        <button type="button" className="btn btn-sm btn-outline-danger" onClick={handleRemoveImage}>
+                          Remove All
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Images Preview */}
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-3">
+                      <h6>Additional Images ({imagePreviews.length})</h6>
+                      <div className="row g-2">
+                        {imagePreviews.map((preview, index) => (
+                          <div key={index} className="col-md-3 col-sm-4 col-6">
+                            <div className="position-relative">
+                              <img 
+                                src={preview} 
+                                alt={`Additional ${index + 1}`} 
+                                className="img-thumbnail w-100" 
+                                style={{ height: '100px', objectFit: 'cover' }} 
+                              />
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-1"
+                                onClick={() => handleRemoveAdditionalImage(index)}
+                                style={{ fontSize: '0.7rem' }}
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -356,7 +603,11 @@ const AddProduct = () => {
                       </span>
                     )}
                     <img
-                      src={p.image ? `${UPLOADS_URL}/${p.image}` : 'https://via.placeholder.com/200'}
+                      src={
+                        p.image 
+                          ? (p.image.startsWith('http') ? p.image : `${UPLOADS_URL}/${p.image}`) 
+                          : 'https://placehold.co/200'
+                      }
                       alt={p.name}
                       className="card-img-top"
                       style={{ height: '150px', objectFit: 'cover' }}

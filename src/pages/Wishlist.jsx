@@ -289,7 +289,11 @@ const Wishlist = () => {
                   {/* Product Image */}
                   <Link to={`/product/${product._id}`}>
                     <img
-                      src={product.image ? `${UPLOADS_URL}/${product.image}` : 'https://via.placeholder.com/300'}
+                      src={
+                        product.image 
+                          ? (product.image.startsWith('http') ? product.image : `${UPLOADS_URL}/${product.image}`) 
+                          : 'https://placehold.co/300'
+                      }
                       alt={product.name}
                       className="card-img-top"
                       style={{ height: '200px', objectFit: 'cover' }}
