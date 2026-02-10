@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaBox, FaStar } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
@@ -7,6 +7,7 @@ import Button from '../components/Button';
 const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL;
 
 const AddProduct = () => {
+  const fileInputRef = useRef(null);
   const [form, setForm] = useState({
     name: '',
     price: '',
@@ -19,6 +20,7 @@ const AddProduct = () => {
   });
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -51,12 +53,43 @@ const AddProduct = () => {
   }, []);
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
+    const file = e.target.files?.[0];
+
+    if (imagePreview && typeof imagePreview === 'string' && imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    setImage(file || null);
+    setRemoveImage(false);
+
     if (file) {
       setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImagePreview(null);
     }
   };
+
+  const handleRemoveImage = () => {
+    if (imagePreview && typeof imagePreview === 'string' && imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    setImage(null);
+    setImagePreview(null);
+    setRemoveImage(true);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview && typeof imagePreview === 'string' && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const resetForm = () => {
     setForm({
@@ -71,7 +104,12 @@ const AddProduct = () => {
     });
     setImage(null);
     setImagePreview(null);
+    setRemoveImage(false);
     setEditingId(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -88,6 +126,7 @@ const AddProduct = () => {
     formData.append('stock', form.stock || 0);
     formData.append('isFeatured', form.isFeatured);
     if (image) formData.append('image', image);
+    if (editingId && removeImage && !image) formData.append('removeImage', 'true');
 
     try {
       if (editingId) {
@@ -124,6 +163,11 @@ const AddProduct = () => {
     setEditingId(product._id);
     setImage(null);
     setImagePreview(product.image ? `${UPLOADS_URL}/${product.image}` : null);
+    setRemoveImage(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -165,12 +209,18 @@ const AddProduct = () => {
                   <input
                     type="file"
                     className="form-control"
+                    ref={fileInputRef}
                     onChange={handleImageChange}
                     accept="image/*"
                     {...(!editingId && { required: true })}
                   />
                   {imagePreview && (
-                    <img src={imagePreview} alt="Preview" className="mt-2 img-thumbnail" style={{ height: '100px' }} />
+                    <div className="mt-2 d-flex align-items-start gap-2">
+                      <img src={imagePreview} alt="Preview" className="img-thumbnail" style={{ height: '100px' }} />
+                      <button type="button" className="btn btn-sm btn-outline-danger" onClick={handleRemoveImage}>
+                        Remove
+                      </button>
+                    </div>
                   )}
                 </div>
 

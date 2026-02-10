@@ -34,7 +34,7 @@ const NotFound = () => {
               <Link to="/shop" className="text-decoration-none">Shop</Link>
               <Link to="/about" className="text-decoration-none">About Us</Link>
               <Link to="/contact" className="text-decoration-none">Contact</Link>
-              <Link to="/cart" className="text-decoration-none">Cart</Link>
+              <Link to="/user/cart" className="text-decoration-none">Cart</Link>
             </div>
           </div>
         </div>

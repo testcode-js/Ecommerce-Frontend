@@ -321,8 +321,8 @@ const Card = ({ product }) => {
           disabled={isOutOfStock}
           className="btn w-100 mt-3 d-flex align-items-center justify-content-center gap-2"
           style={{
-            background: isOutOfStock 
-              ? '#dfe6e9' 
+            background: isOutOfStock
+              ? '#dfe6e9'
               : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: isOutOfStock ? '#636e72' : '#fff',
             border: 'none',

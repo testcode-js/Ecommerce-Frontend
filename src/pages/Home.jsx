@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Banner from '../components/Banner';
 import Features from '../components/Features';
-import BannerCarousel from '../components/BannerCarousel';
 import Card from '../components/Card';
 import API from '../api/axios';
 import Loading from '../components/Loading';
@@ -33,72 +32,382 @@ const Home = () => {
   }, []);
 
   return (
-    <>
-      <BannerCarousel />
-      <Banner />
+    <div className="modern-home">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="container">
+          <div className="hero-content">
+            <div className="hero-text">
+              <h1 className="hero-title">
+                Discover Amazing Products
+              </h1>
+              <p className="hero-subtitle">
+                Shop the latest trends and essentials with quality you can trust
+              </p>
+              <div className="hero-actions">
+                <Link to="/shop" className="btn btn-primary">
+                  Start Shopping
+                </Link>
+                <Link to="/about" className="btn btn-outline">
+                  Learn More
+                </Link>
+              </div>
+            </div>
+            <div className="hero-image">
+              <div className="hero-placeholder">
+                <span className="hero-icon">🛍️</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <Features />
 
       {/* Featured Products */}
       {featuredProducts.length > 0 && (
-        <section className="container my-5">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 style={{ 
-              fontWeight: '700',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
-              ✨ Featured Products
-            </h2>
-            <Link to="/shop?featured=true" className="btn btn-outline-primary" style={{ borderRadius: '25px', padding: '8px 20px' }}>
-              View All
-            </Link>
-          </div>
-          {loading ? (
-            <Loading message="Loading featured products..." />
-          ) : (
-            <div className="row g-4">
-              {featuredProducts.map((product) => (
-                <div key={product._id} className="col-6 col-md-6 col-lg-3">
-                  <Card product={product} />
-                </div>
-              ))}
+        <section className="products-section">
+          <div className="container">
+            <div className="section-header">
+              <div className="section-text">
+                <h2 className="section-title">
+                  ✨ Featured Products
+                </h2>
+                <p className="section-subtitle">
+                  Handpicked items just for you
+                </p>
+              </div>
+              <Link to="/shop?featured=true" className="view-all-btn">
+                View All Products →
+              </Link>
             </div>
-          )}
+            {loading ? (
+              <Loading message="Loading featured products..." />
+            ) : (
+              <div className="products-grid">
+                {featuredProducts.map((product) => (
+                  <div key={product._id} className="product-card-wrapper">
+                    <Card product={product} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       )}
 
       {/* New Arrivals */}
-      <section className="container my-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 style={{ 
-            fontWeight: '700',
-            background: 'linear-gradient(135deg, #00b894 0%, #00cec9 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>
-            🆕 New Arrivals
-          </h2>
-          <Link to="/shop?sort=newest" className="btn btn-outline-success" style={{ borderRadius: '25px', padding: '8px 20px' }}>
-            View All
-          </Link>
-        </div>
-        {loading ? (
-          <Loading message="Loading new arrivals..." />
-        ) : newArrivals.length > 0 ? (
-          <div className="row g-4">
-            {newArrivals.map((product) => (
-              <div key={product._id} className="col-6 col-md-6 col-lg-3">
-                <Card product={product} />
-              </div>
-            ))}
+      <section className="products-section bg-light">
+        <div className="container">
+          <div className="section-header">
+            <div className="section-text">
+              <h2 className="section-title">
+                🆕 New Arrivals
+              </h2>
+              <p className="section-subtitle">
+                Fresh styles and latest collections
+              </p>
+            </div>
+            <Link to="/shop?sort=newest" className="view-all-btn">
+              Shop New Arrivals →
+            </Link>
           </div>
-        ) : (
-          <p className="text-muted text-center">No products available</p>
-        )}
+          {loading ? (
+            <Loading message="Loading new arrivals..." />
+          ) : newArrivals.length > 0 ? (
+            <div className="products-grid">
+              {newArrivals.map((product) => (
+                <div key={product._id} className="product-card-wrapper">
+                  <Card product={product} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <p className="empty-text">No products available</p>
+              <Link to="/shop" className="btn btn-primary">
+                Browse All Products
+              </Link>
+            </div>
+          )}
+        </div>
       </section>
 
-      <Features />
-    </>
+      <style>{`
+        .modern-home {
+          background: #fff;
+        }
+
+        .hero-section {
+          padding: 4rem 0;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .hero-content {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 4rem;
+          align-items: center;
+        }
+
+        .hero-text {
+          animation: fadeInLeft 1s ease;
+        }
+
+        .hero-title {
+          font-size: 3.5rem;
+          font-weight: 800;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 1.5rem;
+          line-height: 1.2;
+        }
+
+        .hero-subtitle {
+          font-size: 1.3rem;
+          color: #636e72;
+          margin-bottom: 2.5rem;
+          line-height: 1.6;
+        }
+
+        .hero-actions {
+          display: flex;
+          gap: 1rem;
+        }
+
+        .hero-image {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          animation: fadeInRight 1s ease;
+        }
+
+        .hero-placeholder {
+          width: 400px;
+          height: 400px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 20px 40px rgba(102,126,234,0.3);
+        }
+
+        .hero-icon {
+          font-size: 8rem;
+          opacity: 0.8;
+        }
+
+        .products-section {
+          padding: 5rem 0;
+        }
+
+        .products-section.bg-light {
+          background: #f8f9fa;
+        }
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          margin-bottom: 3rem;
+        }
+
+        .section-text {
+          flex: 1;
+        }
+
+        .section-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 0.5rem;
+        }
+
+        .section-subtitle {
+          font-size: 1.1rem;
+          color: #636e72;
+          margin: 0;
+        }
+
+        .view-all-btn {
+          color: #667eea;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 1.1rem;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .view-all-btn:hover {
+          color: #764ba2;
+          transform: translateX(5px);
+        }
+
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 2rem;
+        }
+
+        .product-card-wrapper {
+          animation: fadeInUp 0.6s ease;
+          animation-fill-mode: both;
+        }
+
+        .product-card-wrapper:nth-child(1) { animation-delay: 0.1s; }
+        .product-card-wrapper:nth-child(2) { animation-delay: 0.2s; }
+        .product-card-wrapper:nth-child(3) { animation-delay: 0.3s; }
+        .product-card-wrapper:nth-child(4) { animation-delay: 0.4s; }
+
+        .empty-state {
+          text-align: center;
+          padding: 4rem 2rem;
+        }
+
+        .empty-text {
+          font-size: 1.2rem;
+          color: #636e72;
+          margin-bottom: 2rem;
+        }
+
+        .btn {
+          padding: 0.8rem 2rem;
+          border-radius: 50px;
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          border: 2px solid transparent;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: #fff;
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px rgba(102,126,234,0.4);
+        }
+
+        .btn-outline {
+          border-color: #667eea;
+          color: #667eea;
+        }
+
+        .btn-outline:hover {
+          background: #667eea;
+          color: #fff;
+        }
+
+        .btn-large {
+          padding: 1rem 2.5rem;
+          font-size: 1.1rem;
+        }
+
+        @keyframes fadeInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fadeInRight {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .hero-section {
+            padding: 2rem 0;
+          }
+
+          .hero-content {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            text-align: center;
+          }
+
+          .hero-title {
+            font-size: 2.5rem;
+          }
+
+          .hero-subtitle {
+            font-size: 1.1rem;
+          }
+
+          .hero-actions {
+            justify-content: center;
+          }
+
+          .hero-placeholder {
+            width: 300px;
+            height: 300px;
+          }
+
+          .hero-icon {
+            font-size: 6rem;
+          }
+
+          .products-section {
+            padding: 3rem 0;
+          }
+
+          .section-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+          }
+
+          .section-title {
+            font-size: 2rem;
+          }
+
+          .products-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+          }
+
+          .btn {
+            width: 100%;
+            max-width: 300px;
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 

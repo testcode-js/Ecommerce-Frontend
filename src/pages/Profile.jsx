@@ -1,18 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaEnvelope, FaLock, FaMapMarkerAlt, FaSave } from 'react-icons/fa';
+import { 
+  FaUser, 
+  FaEnvelope, 
+  FaLock, 
+  FaMapMarkerAlt, 
+  FaSave, 
+  FaPhone, 
+  FaHistory,
+  FaHeart,
+  FaShoppingCart,
+  FaBox,
+  FaEdit,
+  FaCamera,
+  FaShieldAlt,
+  FaCreditCard,
+  FaChartLine,
+  FaUserCircle,
+  FaCog,
+  FaBell,
+  FaSignOutAlt,
+  FaPlus,
+  FaTrash,
+  FaCheck,
+  FaTimes,
+  FaEye,
+  FaEyeSlash
+} from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
 import Loading from '../components/Loading';
 import Button from '../components/Button';
 
 const Profile = () => {
-  const { user, updateUserData } = useAuth();
+  const navigate = useNavigate();
+  const { user, loading: authLoading, updateUserData, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [activeTab, setActiveTab] = useState('overview');
+  const [editMode, setEditMode] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [trackOrderId, setTrackOrderId] = useState('');
+  const [userStats, setUserStats] = useState({
+    totalOrders: 0,
+    totalSpent: 0,
+    wishlistItems: 0,
+    cartItems: 0,
+    savedMoney: 0,
+    memberSince: ''
+  });
 
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
+    phone: '',
+    bio: '',
+    avatar: ''
   });
 
   const [passwordForm, setPasswordForm] = useState({
@@ -23,13 +66,27 @@ const Profile = () => {
 
   const [addressForm, setAddressForm] = useState({
     fullName: '',
+    phone: '',
     address: '',
     city: '',
     state: '',
     postalCode: '',
     country: 'India',
-    phone: '',
+    isDefault: true
   });
+
+  const [preferences, setPreferences] = useState({
+    emailNotifications: true,
+    pushNotifications: false,
+    newsletter: true,
+    orderUpdates: true,
+    priceDrops: false,
+    newProducts: true
+  });
+
+  const [addresses, setAddresses] = useState([]);
+  const [showAddAddress, setShowAddAddress] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -43,6 +100,25 @@ const Profile = () => {
       }
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/login', { replace: true });
+    }
+  }, [authLoading, user, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/', { replace: true });
+  };
+
+  const handleTrackOrder = (e) => {
+    e.preventDefault();
+    const id = trackOrderId.trim();
+    if (!id) return;
+    setTrackOrderId('');
+    navigate(`/order/${id}`);
+  };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -121,6 +197,69 @@ const Profile = () => {
       )}
 
       <div className="row">
+        {/* Quick Actions */}
+        <div className="col-12 mb-4">
+          <div className="card">
+            <div className="card-header bg-light">
+              <h5 className="mb-0">
+                <FaCog className="me-2" />
+                Account Options
+              </h5>
+            </div>
+            <div className="card-body">
+              <div className="row g-3 align-items-end">
+                <div className="col-md-3">
+                  <Link to="/orders" className="btn btn-outline-primary w-100">
+                    <FaHistory className="me-2" />
+                    My Orders
+                  </Link>
+                </div>
+                <div className="col-md-3">
+                  <Link to="/dashboard" className="btn btn-outline-secondary w-100">
+                    <FaChartLine className="me-2" />
+                    Dashboard
+                  </Link>
+                </div>
+                <div className="col-md-3">
+                  <Link to="/settings" className="btn btn-outline-success w-100">
+                    <FaCog className="me-2" />
+                    Settings
+                  </Link>
+                </div>
+                <div className="col-md-3">
+                  <button type="button" className="btn btn-outline-danger w-100" onClick={handleLogout}>
+                    <FaSignOutAlt className="me-2" />
+                    Logout
+                  </button>
+                </div>
+
+                <div className="col-12">
+                  <form onSubmit={handleTrackOrder} className="row g-2 align-items-end">
+                    <div className="col-md-9">
+                      <label className="form-label mb-1">
+                        <FaBox className="me-2" />
+                        Track Order
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter Order ID (e.g. 65f... )"
+                        value={trackOrderId}
+                        onChange={(e) => setTrackOrderId(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <button type="submit" className="btn btn-primary w-100" disabled={!trackOrderId.trim()}>
+                        Track
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Profile Info */}
         <div className="col-lg-6 mb-4">
           <div className="card h-100">

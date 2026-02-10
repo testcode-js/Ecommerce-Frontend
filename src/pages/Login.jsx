@@ -9,15 +9,26 @@ const Login = () => {
   const [localError, setLocalError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, loading, error, clearError } = useAuth();
+  const { login, user, isAdmin, isAuthenticated, loading, error, clearError } = useAuth();
 
-  const from = location.state?.from?.pathname || '/';
-
+  // Handle redirect after login based on user role
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true });
+    if (isAuthenticated && user) {
+      // If there's a saved location, go there
+      const from = location.state?.from?.pathname;
+      if (from) {
+        navigate(from, { replace: true });
+        return;
+      }
+      
+      // Otherwise redirect based on role
+      if (isAdmin) {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, user, isAdmin, navigate, location.state]);
 
   useEffect(() => {
     return () => clearError();
@@ -39,9 +50,8 @@ const Login = () => {
     }
 
     const result = await login(form.email, form.password);
-    if (result.success) {
-      navigate(from, { replace: true });
-    }
+    // Don't navigate here - let the useEffect handle it
+    // so we can check if user is admin or not
   };
 
   if (loading) return <Loading message="Logging in..." />;

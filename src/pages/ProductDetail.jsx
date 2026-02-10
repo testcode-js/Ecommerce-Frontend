@@ -40,9 +40,18 @@ const ProductDetail = () => {
   }, [id]);
 
   const handleAddToCart = () => {
-    if (product && product.stock > 0) {
-      addToCart({ _id: product._id, name: product.name, price: product.price, image: product.image, brand: product.brand, stock: product.stock }, quantity);
-    }
+    if (!product || product.stock <= 0) return;
+    addToCart(
+      {
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        brand: product.brand,
+        stock: product.stock,
+      },
+      quantity
+    );
   };
 
   const handleToggleWishlist = async () => {
@@ -148,12 +157,17 @@ const ProductDetail = () => {
           )}
 
           <div className="d-flex gap-3 mb-4">
-            <Button title={<><FaShoppingCart className="me-2" />{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</>} onClick={handleAddToCart} disabled={isOutOfStock} />
+            <Button
+              title={<><FaShoppingCart className="me-2" />{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</>}
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+            />
             <button className={`btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}`} onClick={handleToggleWishlist}>
               {inWishlist ? <FaHeart className="me-2" /> : <FaRegHeart className="me-2" />}
               {inWishlist ? 'In Wishlist' : 'Add to Wishlist'}
             </button>
           </div>
+
         </div>
       </div>
 
