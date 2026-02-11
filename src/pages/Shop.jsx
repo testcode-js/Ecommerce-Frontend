@@ -232,33 +232,32 @@ const Shop = () => {
 
       <style>{`
         .modern-shop {
-          padding: 2rem 0;
-          min-height: 80vh;
+          background: var(--bg-primary);
+          min-height: 100vh;
         }
 
         .shop-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          background: var(--bg-secondary);
+          border-bottom: 1px solid var(--border-color);
+          padding: 2rem 0;
           margin-bottom: 2rem;
-          padding-bottom: 1rem;
-          border-bottom: 1px solid #f0f0f0;
+          border-radius: 0 0 16px 16px;
         }
 
         .shop-title h1 {
           font-size: 2rem;
-          font-weight: 700;
+          font-weight: 800;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          margin-bottom: 0.5rem;
+          margin: 0;
         }
 
-        .results-count {
-          color: #636e72;
-          font-size: 1rem;
+        .shop-title p {
+          color: var(--text-secondary);
           margin: 0;
+          font-size: 0.9rem;
         }
 
         .filter-toggle-btn {
@@ -266,19 +265,19 @@ const Shop = () => {
           align-items: center;
           gap: 0.5rem;
           padding: 0.8rem 1.5rem;
-          background: #fff;
-          border: 2px solid #e9ecef;
+          background: var(--card-bg);
+          border: 2px solid var(--border-color);
           border-radius: 50px;
           cursor: pointer;
           font-weight: 600;
-          color: #636e72;
+          color: var(--text-secondary);
           transition: all 0.3s ease;
           position: relative;
         }
 
         .filter-toggle-btn:hover {
-          border-color: #667eea;
-          color: #667eea;
+          border-color: var(--accent-color);
+          color: var(--accent-color);
         }
 
         .filter-badge {
@@ -298,9 +297,9 @@ const Shop = () => {
         }
 
         .filters-sidebar {
-          background: #fff;
+          background: var(--card-bg);
           border-radius: 16px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          box-shadow: var(--card-shadow);
           padding: 1.5rem;
           height: fit-content;
           position: sticky;
@@ -314,13 +313,13 @@ const Shop = () => {
           align-items: center;
           margin-bottom: 1.5rem;
           padding-bottom: 1rem;
-          border-bottom: 1px solid #f0f0f0;
+          border-bottom: 1px solid var(--border-color);
         }
 
         .filters-header h3 {
           font-size: 1.2rem;
           font-weight: 700;
-          color: #2d3436;
+          color: var(--text-primary);
           margin: 0;
         }
 
@@ -346,7 +345,7 @@ const Shop = () => {
           display: none;
           background: none;
           border: none;
-          color: #636e72;
+          color: var(--text-secondary);
           cursor: pointer;
           font-size: 1.2rem;
         }
@@ -360,7 +359,7 @@ const Shop = () => {
           align-items: center;
           gap: 0.5rem;
           font-weight: 600;
-          color: #2d3436;
+          color: var(--text-primary);
           margin-bottom: 0.5rem;
           font-size: 0.9rem;
         }
@@ -369,17 +368,19 @@ const Shop = () => {
         .filter-select {
           width: 100%;
           padding: 0.8rem;
-          border: 2px solid #f0f0f0;
+          border: 2px solid var(--border-color);
           border-radius: 8px;
           font-size: 0.9rem;
+          background: var(--input-bg);
+          color: var(--text-primary);
           transition: all 0.3s ease;
         }
 
         .filter-input:focus,
         .filter-select:focus {
           outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+          border-color: var(--accent-color);
+          box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
         }
 
         .price-inputs {
@@ -389,7 +390,7 @@ const Shop = () => {
         }
 
         .price-separator {
-          color: #636e72;
+          color: var(--text-secondary);
           font-weight: 600;
         }
 
@@ -427,12 +428,12 @@ const Shop = () => {
 
         .empty-state h3 {
           font-size: 1.5rem;
-          color: #2d3436;
+          color: var(--text-primary);
           margin-bottom: 1rem;
         }
 
         .empty-state p {
-          color: #636e72;
+          color: var(--text-secondary);
           margin-bottom: 2rem;
         }
 
@@ -450,8 +451,8 @@ const Shop = () => {
         }
 
         .btn-primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: #fff;
+          background: var(--button-primary-bg);
+          color: var(--button-primary-text);
         }
 
         .btn-primary:hover {
@@ -502,8 +503,8 @@ const Shop = () => {
             left: -100%;
             width: 80%;
             height: 100vh;
-            background: #fff;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
             z-index: 1000;
             border-radius: 0;
             overflow-y: auto;

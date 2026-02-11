@@ -1,7 +1,6 @@
 import React from 'react';
 import './App.css';
 import './styles/EnhancedUI.css';
-import './styles/ThemeStyles.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Layout and Pages

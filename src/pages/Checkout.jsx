@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
 import Button from '../components/Button';
 import Loading from '../components/Loading';
+import FakePaymentModal from '../components/FakePaymentModal';
 
 const Checkout = () => {
   const { 
@@ -38,6 +39,8 @@ const Checkout = () => {
     phone: user?.phone || '',
   });
   const [paymentMethod, setPaymentMethod] = useState('COD');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingOrder, setPendingOrder] = useState(null);
 
   const handleAddressChange = (e) => {
     setShippingAddress({ ...shippingAddress, [e.target.name]: e.target.value });
@@ -67,6 +70,20 @@ const Checkout = () => {
     setCouponError('');
   };
 
+  const placeOrder = async (orderPayload) => {
+    try {
+      setLoading(true);
+      const { data } = await API.post('/orders', orderPayload);
+      clearCart();
+      setPendingOrder(null);
+      navigate(`/order-success/${data._id}`);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to place order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -76,35 +93,45 @@ const Checkout = () => {
       return;
     }
 
-    try {
-      setLoading(true);
+    const orderData = {
+      orderItems: cartItems.map((item) => ({
+        product: item._id,
+        name: item.name,
+        image: item.image,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      shippingAddress,
+      paymentMethod,
+      itemsPrice: subtotal,
+      shippingPrice: shipping,
+      taxPrice: tax,
+      discountAmount: discount,
+      couponCode: appliedCoupon?.code || null,
+      totalPrice: finalTotal,
+    };
 
-      const orderData = {
-        orderItems: cartItems.map((item) => ({
-          product: item._id,
-          name: item.name,
-          image: item.image,
-          price: item.price,
-          quantity: item.quantity,
-        })),
-        shippingAddress,
-        paymentMethod,
-        itemsPrice: subtotal,
-        shippingPrice: shipping,
-        taxPrice: tax,
-        discountAmount: discount,
-        couponCode: appliedCoupon?.code || null,
-        totalPrice: finalTotal,
-      };
+    if (paymentMethod === 'COD') {
+      await placeOrder(orderData);
+      return;
+    }
 
-      const { data } = await API.post('/orders', orderData);
+    setPendingOrder(orderData);
+    setShowPaymentModal(true);
+  };
 
-      clearCart();
-      navigate(`/order-success/${data._id}`);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to place order');
-    } finally {
-      setLoading(false);
+  const handlePaymentSuccess = async (paymentResult) => {
+    setShowPaymentModal(false);
+    if (!pendingOrder) return;
+    await placeOrder({
+      ...pendingOrder,
+      paymentResult,
+    });
+  };
+
+  const handlePaymentModalClose = () => {
+    if (!loading) {
+      setShowPaymentModal(false);
     }
   };
 
@@ -119,7 +146,11 @@ const Checkout = () => {
     );
   }
 
+  const modalAmount = pendingOrder?.totalPrice || finalTotal;
+  const modalMethod = pendingOrder?.paymentMethod || paymentMethod;
+
   return (
+    <>
     <div className="container my-5">
       <h2 className="mb-4">Checkout</h2>
 
@@ -372,6 +403,14 @@ const Checkout = () => {
         </div>
       </div>
     </div>
+    <FakePaymentModal
+      open={showPaymentModal}
+      amount={modalAmount}
+      method={modalMethod}
+      onClose={handlePaymentModalClose}
+      onSuccess={handlePaymentSuccess}
+    />
+    </>
   );
 };
 

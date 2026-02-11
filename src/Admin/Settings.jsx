@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FaCog, FaSave, FaBell, FaEnvelope, FaShieldAlt, FaPalette, FaGlobe } from 'react-icons/fa';
-import ThemeToggle from '../components/ThemeToggle';
 import './AdminLayout.css';
 
 const Settings = () => {
@@ -241,17 +240,6 @@ const Settings = () => {
 
               {activeTab === 'appearance' && (
                 <div className="row g-3">
-                  {/* Theme Toggle Section */}
-                  <div className="col-12 mb-3">
-                    <label className="form-label d-block mb-2">Theme Mode</label>
-                    <div className="p-3 bg-light rounded">
-                      <ThemeToggle />
-                    </div>
-                    <small className="text-muted d-block mt-1">
-                      Toggle between light and dark mode for the admin panel
-                    </small>
-                  </div>
-
                   <div className="col-md-6">
                     <label className="form-label">Primary Color</label>
                     <input

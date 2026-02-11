@@ -49,17 +49,19 @@ const Login = () => {
       return;
     }
 
-    const result = await login(form.email, form.password);
-    // Don't navigate here - let the useEffect handle it
-    // so we can check if user is admin or not
+    try {
+      const result = await login(form.email, form.password);
+    } catch (error) {
+      setLocalError(error.message);
+    }
   };
 
   if (loading) return <Loading message="Logging in..." />;
 
   return (
-    <div className='d-flex align-items-center justify-content-center' style={{ minHeight: '80vh' }}>
-      <div className='card shadow p-4' style={{ maxWidth: '400px', width: '100%' }}>
-        <h2 className='text-center mb-4'>Login</h2>
+    <div className='d-flex align-items-center justify-content-center' style={{ minHeight: '80vh', background: '#ffffff' }}>
+      <div className='card shadow p-4' style={{ maxWidth: '400px', width: '100%', background: '#ffffff' }}>
+        <h2 className='text-center mb-4' style={{ color: '#1e293b' }}>Login</h2>
         
         {(error || localError) && (
           <div className="alert alert-danger">{error || localError}</div>
@@ -93,15 +95,15 @@ const Login = () => {
           </div>
 
           <div className='mb-3 text-end'>
-            <Link to='/forgot-password' className='text-muted small'>
+            <Link to='/forgot-password' className='text-muted small' style={{ color: '#64748b' }}>
               Forgot Password?
             </Link>
           </div>
 
-          <Button type='submit' title='Login' className='w-100' disabled={loading} />
+          <Button title='Login' onClick={handleSubmit} className='w-100' disabled={loading} />
 
-          <p className='mt-3 text-center'>
-            Don't have an account? <Link to='/signup'>Sign up</Link>
+          <p className='mt-3 text-center' style={{ color: '#64748b' }}>
+            Don't have an account? <Link to='/signup' style={{ color: '#667eea' }}>Sign up</Link>
           </p>
         </form>
       </div>

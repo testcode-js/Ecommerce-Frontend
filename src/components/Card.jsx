@@ -101,26 +101,36 @@ const Card = ({ product }) => {
     borderRadius: '16px',
     overflow: 'hidden',
     transition: 'all 0.3s ease',
-    transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+    transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
     boxShadow: isHovered 
       ? '0 20px 40px rgba(0,0,0,0.15)' 
       : '0 4px 15px rgba(0,0,0,0.08)',
     border: 'none',
     background: '#fff',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   };
 
   const imageContainerStyle = {
     position: 'relative',
     overflow: 'hidden',
     background: 'linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '350px',
+    width: '100%',
   };
 
   const imageStyle = {
-    height: '220px',
-    width: '100%',
-    objectFit: 'cover',
+    maxHeight: '100%',
+    maxWidth: '100%',
+    width: 'auto',
+    height: 'auto',
+    objectFit: 'contain',
     transition: 'transform 0.5s ease',
-    transform: isHovered ? 'scale(1.08)' : 'scale(1)',
+    transform: isHovered ? 'scale(1.05)' : 'scale(1)',
   };
 
   const actionButtonsStyle = {
@@ -289,7 +299,7 @@ const Card = ({ product }) => {
       </div>
 
       {/* Card Body */}
-      <div className="card-body" style={{ padding: '20px' }}>
+      <div className="card-body" style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
         {/* Category */}
         <div className="mb-2">
           <span 
