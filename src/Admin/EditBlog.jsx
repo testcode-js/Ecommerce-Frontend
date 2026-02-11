@@ -40,7 +40,7 @@ const EditBlog = () => {
         author: 'John Doe',
         tags: 'react, javascript, web development',
         category: 'technology',
-        featuredImage: 'https://via.placeholder.com/800x400',
+        featuredImage: 'https://placehold.co/800x400',
         status: 'published',
         publishDate: '2024-01-16'
       };

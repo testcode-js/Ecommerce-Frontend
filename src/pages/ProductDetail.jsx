@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { FaShoppingCart, FaHeart, FaRegHeart, FaMinus, FaPlus } from 'react-icons/fa';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { FaShoppingCart, FaHeart, FaRegHeart, FaMinus, FaPlus, FaFileInvoice } from 'react-icons/fa';
 import API from '../api/axios';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -13,11 +13,13 @@ const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL;
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -28,11 +30,48 @@ const ProductDetail = () => {
       setLoading(true);
       const { data } = await API.get(`/products/${id}`);
       setProduct(data);
+      setSelectedImageIndex(0); // Reset to first image when product loads
     } catch (err) {
       console.error('Fetch product error:', err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getAllImages = (product) => {
+    const images = [];
+    
+    // Handle main image - check if it's a Cloudinary URL or local path
+    if (product.image) {
+      if (product.image.startsWith('http')) {
+        // Cloudinary URL - use as is
+        images.push(product.image);
+      } else {
+        // Local file path - prepend UPLOADS_URL
+        images.push(`${UPLOADS_URL}/${product.image}`);
+      }
+    }
+    
+    // Handle additional images - check if they are Cloudinary URLs or local paths
+    if (product.images && product.images.length > 0) {
+      product.images.forEach(img => {
+        if (img) {
+          if (img.startsWith('http')) {
+            // Cloudinary URL - use as is
+            images.push(img);
+          } else {
+            // Local file path - prepend UPLOADS_URL
+            images.push(`${UPLOADS_URL}/${img}`);
+          }
+        }
+      });
+    }
+    
+    return images.length > 0 ? images : ['https://placehold.co/500'];
+  };
+
+  const handleImageSelect = (index) => {
+    setSelectedImageIndex(index);
   };
 
   useEffect(() => {
@@ -66,6 +105,10 @@ const ProductDetail = () => {
     }
   };
 
+  const handleGenerateInvoice = () => {
+    navigate(`/invoice/${product._id}`);
+  };
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
@@ -87,7 +130,8 @@ const ProductDetail = () => {
   if (loading) return <Loading message="Loading product..." />;
   if (!product) return <div className="container my-5 text-center"><h4>Product not found</h4><Link to="/shop">Back to Shop</Link></div>;
 
-  const imgUrl = product.image ? `${UPLOADS_URL}/${product.image}` : 'https://via.placeholder.com/500';
+  const allImages = getAllImages(product);
+  const currentImage = allImages[selectedImageIndex] || 'https://placehold.co/500';
   const categoryName = typeof product.category === 'object' ? product.category?.name : 'N/A';
   const isOutOfStock = product.stock <= 0;
   const inWishlist = isInWishlist(product._id);
@@ -107,14 +151,43 @@ const ProductDetail = () => {
 
       <div className="row mb-5">
         <div className="col-lg-5">
-          <div className="position-relative">
+          {/* Main Image Display */}
+          <div className="position-relative mb-3">
             {discount > 0 && (
-              <span className="badge bg-danger position-absolute" style={{ top: 10, left: 10, fontSize: '1rem' }}>
+              <span className="badge bg-danger position-absolute" style={{ top: 10, left: 10, fontSize: '1rem', zIndex: 10 }}>
                 {discount}% OFF
               </span>
             )}
-            <img src={imgUrl} alt={product.name} className="img-fluid rounded shadow" style={{ maxHeight: '500px', width: '100%', objectFit: 'cover' }} />
+            <img 
+              src={currentImage} 
+              alt={product.name} 
+              className="img-fluid rounded shadow" 
+              style={{ maxHeight: '500px', width: '100%', objectFit: 'cover' }} 
+            />
           </div>
+          
+          {/* Image Thumbnails */}
+          {allImages.length > 1 && (
+            <div className="row g-2">
+              {allImages.map((image, index) => (
+                <div key={index} className="col-3">
+                  <img
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                    className={`img-thumbnail rounded cursor-pointer ${selectedImageIndex === index ? 'border-primary border-2' : ''}`}
+                    style={{ 
+                      height: '80px', 
+                      width: '100%', 
+                      objectFit: 'cover',
+                      opacity: selectedImageIndex === index ? 1 : 0.7,
+                      border: selectedImageIndex === index ? '2px solid #0d6efd' : '1px solid #dee2e6'
+                    }}
+                    onClick={() => handleImageSelect(index)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="col-lg-7">
@@ -165,6 +238,14 @@ const ProductDetail = () => {
             <button className={`btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}`} onClick={handleToggleWishlist}>
               {inWishlist ? <FaHeart className="me-2" /> : <FaRegHeart className="me-2" />}
               {inWishlist ? 'In Wishlist' : 'Add to Wishlist'}
+            </button>
+            <button 
+              className="btn btn-outline-info"
+              onClick={handleGenerateInvoice}
+              title="Generate Invoice"
+            >
+              <FaFileInvoice className="me-2" />
+              Invoice
             </button>
           </div>
 

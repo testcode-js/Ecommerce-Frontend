@@ -22,7 +22,12 @@ const SearchBar = () => {
         placeholder="Search products..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        style={{ borderRadius: '20px 0 0 20px' }}
+        style={{ 
+          borderRadius: '20px 0 0 20px',
+          background: '#ffffff',
+          borderColor: '#e2e8f0',
+          color: '#1e293b'
+        }}
       />
       <button
         type="submit"

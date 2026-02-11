@@ -149,7 +149,7 @@ const Blog = () => {
             {featuredPosts.map(post => (
               <article key={post._id} className="featured-card">
                 <div className="featured-image">
-                  <img src={post.featuredImage || 'https://via.placeholder.com/800x400'} alt={post.title} />
+                  <img src={post.featuredImage || 'https://placehold.co/800x400'} alt={post.title} />
                   <div className="featured-badge">Featured</div>
                 </div>
                 <div className="featured-content">
@@ -161,7 +161,7 @@ const Blog = () => {
                   <p>{post.excerpt}</p>
                   <div className="featured-footer">
                     <div className="author-info">
-                      <img src={post.authorAvatar || 'https://via.placeholder.com/50x50'} alt={post.author} />
+                      <img src={post.authorAvatar || 'https://placehold.co/50x50'} alt={post.author} />
                       <span>{post.author}</span>
                     </div>
                     <Link to={`/blog/${post._id}`} className="read-more">
@@ -193,7 +193,7 @@ const Blog = () => {
             {regularPosts.map(post => (
               <article key={post._id} className="blog-card">
                 <div className="blog-image">
-                  <img src={post.featuredImage || 'https://via.placeholder.com/800x400'} alt={post.title} />
+                  <img src={post.featuredImage || 'https://placehold.co/800x400'} alt={post.title} />
                   <div className="blog-overlay">
                     <Link to={`/blog/${post._id}`} className="overlay-link">
                       <FaSearch />
@@ -212,7 +212,7 @@ const Blog = () => {
                   
                   <div className="blog-footer">
                     <div className="author-section">
-                      <img src={post.authorAvatar || 'https://via.placeholder.com/50x50'} alt={post.author} />
+                      <img src={post.authorAvatar || 'https://placehold.co/50x50'} alt={post.author} />
                       <div className="author-details">
                         <span className="author-name">{post.author}</span>
                         <span className="publish-date">

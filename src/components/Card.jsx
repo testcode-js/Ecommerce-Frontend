@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEye, FaHeart, FaShoppingCart, FaRegHeart, FaStar } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
@@ -9,19 +9,72 @@ const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL;
 
 const Card = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
 
-  const { _id, name, price, originalPrice, image, brand, category, rating, numReviews, stock } = product;
+  const { _id, name, price, originalPrice, image, images, brand, category, rating, numReviews, stock } = product;
 
-  const imgUrl = image ? `${UPLOADS_URL}/${image}` : 'https://via.placeholder.com/400x400?text=No+Image';
+  // Get all images for product
+  const getAllImages = () => {
+    const allImages = [];
+    
+    // Handle main image
+    if (image) {
+      if (image.startsWith('http')) {
+        // Cloudinary URL - use as is
+        allImages.push(image);
+      } else {
+        // Local file path - prepend UPLOADS_URL
+        allImages.push(`${UPLOADS_URL}/${image}`);
+      }
+    }
+    
+    // Handle additional images
+    if (images && images.length > 0) {
+      images.forEach(img => {
+        if (img) {
+          if (img.startsWith('http')) {
+            // Cloudinary URL - use as is
+            allImages.push(img);
+          } else {
+            // Local file path - prepend UPLOADS_URL
+            allImages.push(`${UPLOADS_URL}/${img}`);
+          }
+        }
+      });
+    }
+    
+    return allImages.length > 0 ? allImages : ['https://placehold.co/400x400?text=No+Image'];
+  };
+
+  const allImages = getAllImages();
+  const currentImage = allImages[currentImageIndex];
   const categoryName = typeof category === 'object' ? category?.name : category;
   const isOutOfStock = stock !== undefined && stock <= 0;
   const inWishlist = isInWishlist(_id);
   const discount = originalPrice && originalPrice > price
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
     : 0;
+
+  // Change image on hover
+  useEffect(() => {
+    if (isHovered && allImages.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
+      }, 1000); // Change image every 1 second
+
+      return () => clearInterval(interval);
+    }
+  }, [isHovered, allImages.length]);
+
+  // Reset image index when hover ends
+  useEffect(() => {
+    if (!isHovered) {
+      setCurrentImageIndex(0);
+    }
+  }, [isHovered]);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -48,26 +101,36 @@ const Card = ({ product }) => {
     borderRadius: '16px',
     overflow: 'hidden',
     transition: 'all 0.3s ease',
-    transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+    transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
     boxShadow: isHovered 
       ? '0 20px 40px rgba(0,0,0,0.15)' 
       : '0 4px 15px rgba(0,0,0,0.08)',
     border: 'none',
     background: '#fff',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   };
 
   const imageContainerStyle = {
     position: 'relative',
     overflow: 'hidden',
     background: 'linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '350px',
+    width: '100%',
   };
 
   const imageStyle = {
-    height: '220px',
-    width: '100%',
-    objectFit: 'cover',
+    maxHeight: '100%',
+    maxWidth: '100%',
+    width: 'auto',
+    height: 'auto',
+    objectFit: 'contain',
     transition: 'transform 0.5s ease',
-    transform: isHovered ? 'scale(1.08)' : 'scale(1)',
+    transform: isHovered ? 'scale(1.05)' : 'scale(1)',
   };
 
   const actionButtonsStyle = {
@@ -183,7 +246,27 @@ const Card = ({ product }) => {
         </button>
 
         <Link to={`/product/${_id}`}>
-          <img src={imgUrl} alt={name} style={imageStyle} />
+          <img src={currentImage} alt={name} style={imageStyle} />
+          {/* Image indicators for multiple images */}
+          {allImages.length > 1 && (
+            <div 
+              className="position-absolute bottom-0 start-0 w-100 d-flex justify-content-center gap-1 p-2"
+              style={{ zIndex: 2 }}
+            >
+              {allImages.map((_, index) => (
+                <div
+                  key={index}
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: currentImageIndex === index ? '#fff' : 'rgba(255,255,255,0.5)',
+                    transition: 'background 0.3s ease',
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </Link>
 
         {/* Hover Action Buttons */}
@@ -216,7 +299,7 @@ const Card = ({ product }) => {
       </div>
 
       {/* Card Body */}
-      <div className="card-body" style={{ padding: '20px' }}>
+      <div className="card-body" style={{ padding: '20px', flex: '1', display: 'flex', flexDirection: 'column' }}>
         {/* Category */}
         <div className="mb-2">
           <span 

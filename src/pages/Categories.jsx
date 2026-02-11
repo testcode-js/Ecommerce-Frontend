@@ -31,7 +31,7 @@ const Categories = () => {
             name: 'Summer Dress',
             price: 999,
             originalPrice: 1499,
-            image: 'https://via.placeholder.com/300',
+            image: 'https://placehold.co/300',
             category: '1',
             rating: 4.5,
             numReviews: 234,
@@ -43,7 +43,7 @@ const Categories = () => {
             name: 'Wireless Headphones',
             price: 1999,
             originalPrice: 2999,
-            image: 'https://via.placeholder.com/300',
+            image: 'https://placehold.co/300',
             category: '2',
             rating: 4.2,
             numReviews: 156,
@@ -55,7 +55,7 @@ const Categories = () => {
             name: 'Garden Tools Set',
             price: 799,
             originalPrice: 999,
-            image: 'https://via.placeholder.com/300',
+            image: 'https://placehold.co/300',
             category: '3',
             rating: 4.3,
             numReviews: 89,
@@ -67,7 +67,7 @@ const Categories = () => {
             name: 'Yoga Mat',
             price: 499,
             originalPrice: 699,
-            image: 'https://via.placeholder.com/300',
+            image: 'https://placehold.co/300',
             category: '4',
             rating: 4.7,
             numReviews: 45,
@@ -79,7 +79,7 @@ const Categories = () => {
             name: 'Bestseller Novel',
             price: 299,
             originalPrice: 399,
-            image: 'https://via.placeholder.com/300',
+            image: 'https://placehold.co/300',
             category: '5',
             rating: 4.8,
             numReviews: 167,
@@ -91,7 +91,7 @@ const Categories = () => {
             name: 'Educational Puzzle',
             price: 399,
             originalPrice: 599,
-            image: 'https://via.placeholder.com/300',
+            image: 'https://placehold.co/300',
             category: '6',
             rating: 4.4,
             numReviews: 78,
@@ -197,7 +197,7 @@ const Categories = () => {
                 <Link to={`/product/${product._id}`} className="product-image-link">
                   <div className="product-image">
                     <img
-                      src={product.image ? `${import.meta.env.VITE_UPLOADS_URL}/${product.image}` : 'https://via.placeholder.com/300'}
+                      src={product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_UPLOADS_URL}/${product.image}`) : 'https://placehold.co/300'}
                       alt={product.name}
                     />
                     <div className="product-overlay">

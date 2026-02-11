@@ -1,7 +1,6 @@
 import React from 'react';
 import './App.css';
 import './styles/EnhancedUI.css';
-import './styles/ThemeStyles.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Layout and Pages
@@ -29,6 +28,8 @@ import SignUp from './pages/Signup';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import TestCloudinary from './pages/TestCloudinary';
+import Invoice from './pages/Invoice';
 import NotFound from './pages/NotFound';
 
 // Admin Pages
@@ -87,6 +88,8 @@ const App = () => {
         <Route path="login" element={<Login />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password/:token" element={<ResetPassword />} />
+        <Route path="test-cloudinary" element={<TestCloudinary />} />
+        <Route path="invoice/:id" element={<Invoice />} />
 
         {/* Protected User Pages */}
         <Route path="cart" element={<Navigate to="/user/cart" replace />} />

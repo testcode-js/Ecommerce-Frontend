@@ -136,7 +136,7 @@ const Home = () => {
 
       <style>{`
         .modern-home {
-          background: #fff;
+          background: #ffffff;
         }
 
         .hero-section {
@@ -158,7 +158,7 @@ const Home = () => {
         .hero-title {
           font-size: 3.5rem;
           font-weight: 800;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -168,7 +168,7 @@ const Home = () => {
 
         .hero-subtitle {
           font-size: 1.3rem;
-          color: #636e72;
+          color: #64748b;
           margin-bottom: 2.5rem;
           line-height: 1.6;
         }
@@ -188,12 +188,12 @@ const Home = () => {
         .hero-placeholder {
           width: 400px;
           height: 400px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
           border-radius: 20px;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 20px 40px rgba(102,126,234,0.3);
+          box-shadow: 0 20px 40px rgba(102,126,234, 0.3);
         }
 
         .hero-icon {
@@ -206,7 +206,7 @@ const Home = () => {
         }
 
         .products-section.bg-light {
-          background: #f8f9fa;
+          background: #f8fafc;
         }
 
         .section-header {
@@ -221,41 +221,42 @@ const Home = () => {
         }
 
         .section-title {
-          font-size: 2.5rem;
+          font-size: 2rem;
           font-weight: 700;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: 0.5rem;
+          color: #1e293b;
+          margin-bottom: 1rem;
         }
 
         .section-subtitle {
           font-size: 1.1rem;
-          color: #636e72;
-          margin: 0;
+          color: #64748b;
+          margin-bottom: 2rem;
+          line-height: 1.6;
         }
 
         .view-all-btn {
-          color: #667eea;
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 1.1rem;
-          transition: all 0.3s ease;
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 0.5rem;
+          padding: 0.8rem 1.5rem;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: #fff;
+          text-decoration: none;
+          border-radius: 25px;
+          font-weight: 600;
+          transition: all 0.3s ease;
         }
 
         .view-all-btn:hover {
-          color: #764ba2;
-          transform: translateX(5px);
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px rgba(102,126,234,0.4);
         }
 
         .products-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 2rem;
+          margin-bottom: 3rem;
         }
 
         .product-card-wrapper {
@@ -275,20 +276,32 @@ const Home = () => {
 
         .empty-text {
           font-size: 1.2rem;
-          color: #636e72;
+          color: #64748b;
           margin-bottom: 2rem;
         }
 
         .btn {
           padding: 0.8rem 2rem;
-          border-radius: 50px;
-          text-decoration: none;
+          border-radius: 25px;
+          border: none;
           font-weight: 600;
+          cursor: pointer;
           transition: all 0.3s ease;
-          border: 2px solid transparent;
+          text-decoration: none;
           display: inline-flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .btn-outline {
+          background: transparent;
+          border: 2px solid #667eea;
+          color: #667eea;
+        }
+
+        .btn-outline:hover {
+          background: #667eea;
+          color: #fff;
         }
 
         .btn-primary {
@@ -299,21 +312,6 @@ const Home = () => {
         .btn-primary:hover {
           transform: translateY(-2px);
           box-shadow: 0 10px 30px rgba(102,126,234,0.4);
-        }
-
-        .btn-outline {
-          border-color: #667eea;
-          color: #667eea;
-        }
-
-        .btn-outline:hover {
-          background: #667eea;
-          color: #fff;
-        }
-
-        .btn-large {
-          padding: 1rem 2.5rem;
-          font-size: 1.1rem;
         }
 
         @keyframes fadeInLeft {
@@ -350,40 +348,15 @@ const Home = () => {
         }
 
         @media (max-width: 768px) {
-          .hero-section {
-            padding: 2rem 0;
-          }
-
           .hero-content {
             grid-template-columns: 1fr;
             gap: 2rem;
-            text-align: center;
           }
 
           .hero-title {
             font-size: 2.5rem;
           }
 
-          .hero-subtitle {
-            font-size: 1.1rem;
-          }
-
-          .hero-actions {
-            justify-content: center;
-          }
-
-          .hero-placeholder {
-            width: 300px;
-            height: 300px;
-          }
-
-          .hero-icon {
-            font-size: 6rem;
-          }
-
-          .products-section {
-            padding: 3rem 0;
-          }
 
           .section-header {
             flex-direction: column;

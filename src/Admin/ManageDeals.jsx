@@ -19,68 +19,8 @@ const ManageDeals = () => {
 
   const fetchDeals = async () => {
     try {
-      // Mock data for now - replace with actual API call
-      const mockDeals = [
-        {
-          _id: '1',
-          title: 'Flash Sale - Electronics',
-          description: 'Up to 50% off on selected electronics items',
-          discountType: 'percentage',
-          discountValue: 50,
-          originalPrice: 999.99,
-          dealPrice: 499.99,
-          category: 'electronics',
-          status: 'active',
-          featuredImage: 'https://via.placeholder.com/300x200',
-          startDate: '2024-01-15T00:00:00',
-          endDate: '2024-01-31T23:59:59',
-          maxUsage: 100,
-          currentUsage: 45,
-          minOrderAmount: 50,
-          createdAt: '2024-01-10',
-          productIds: ['1', '2', '3']
-        },
-        {
-          _id: '2',
-          title: 'Weekend Fashion Deal',
-          description: 'Get $20 off on all clothing items above $100',
-          discountType: 'fixed',
-          discountValue: 20,
-          originalPrice: 150,
-          dealPrice: 130,
-          category: 'clothing',
-          status: 'active',
-          featuredImage: 'https://via.placeholder.com/300x200',
-          startDate: '2024-01-12T00:00:00',
-          endDate: '2024-01-14T23:59:59',
-          maxUsage: 200,
-          currentUsage: 128,
-          minOrderAmount: 100,
-          createdAt: '2024-01-08',
-          productIds: []
-        },
-        {
-          _id: '3',
-          title: 'Home Garden Special',
-          description: '30% off on home and garden products',
-          discountType: 'percentage',
-          discountValue: 30,
-          originalPrice: 299.99,
-          dealPrice: 209.99,
-          category: 'home',
-          status: 'scheduled',
-          featuredImage: 'https://via.placeholder.com/300x200',
-          startDate: '2024-02-01T00:00:00',
-          endDate: '2024-02-15T23:59:59',
-          maxUsage: 150,
-          currentUsage: 0,
-          minOrderAmount: 0,
-          createdAt: '2024-01-09',
-          productIds: ['4', '5']
-        }
-      ];
-      
-      setDeals(mockDeals);
+      const response = await API.get('/deals');
+      setDeals(response.data.deals || []);
     } catch (error) {
       console.error('Error fetching deals:', error);
     } finally {
@@ -91,10 +31,8 @@ const ManageDeals = () => {
   const handleDelete = async (dealId) => {
     if (window.confirm('Are you sure you want to delete this deal?')) {
       try {
-        // Mock API call - replace with actual API
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await API.delete(`/deals/${dealId}`);
         setDeals(deals.filter(deal => deal._id !== dealId));
-        console.log('Deal deleted:', dealId);
       } catch (error) {
         console.error('Error deleting deal:', error);
       }
@@ -104,12 +42,10 @@ const ManageDeals = () => {
   const handleStatusToggle = async (dealId, currentStatus) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     try {
-      // Mock API call - replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setDeals(deals.map(deal => 
+      await API.put(`/deals/${dealId}`, { status: newStatus });
+      setDeals(deals.map(deal =>
         deal._id === dealId ? { ...deal, status: newStatus } : deal
       ));
-      console.log('Deal status updated:', dealId, newStatus);
     } catch (error) {
       console.error('Error updating deal status:', error);
     }

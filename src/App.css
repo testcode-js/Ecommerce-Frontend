@@ -9,38 +9,38 @@ body {
 
 /* Admin Dashboard Color Scheme */
 .admin-dashboard {
-  background: #f8f9fa;
+  background: var(--bg-primary);
 }
 
 /* Modern Card Styles */
 .admin-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.08);
-  border: 1px solid rgba(102, 126, 234, 0.1);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
   overflow: hidden;
 }
 
 .admin-card:hover {
-  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.15);
+  box-shadow: var(--card-shadow);
   transform: translateY(-4px);
-  border-color: rgba(102, 126, 234, 0.2);
+  border-color: var(--accent-color);
 }
 
 .admin-card .card-header {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   font-weight: 600;
-  color: #667eea;
+  color: var(--text-primary);
 }
 
 /* Stats Cards with Theme Colors */
 .stat-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.08);
+  box-shadow: var(--card-shadow);
   border-left: 4px solid;
   transition: all 0.3s ease;
   position: relative;
@@ -656,4 +656,97 @@ textarea.form-control {
   height: auto;
   border-radius: 6px;
   object-fit: cover;
+}
+
+/* Fake payment modal */
+.payment-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.payment-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.25);
+  position: relative;
+  overflow: hidden;
+  animation: paymentModalIn 0.35s ease;
+}
+
+.payment-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.payment-modal-close:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.15);
+  color: #0f172a;
+}
+
+.payment-modal-header {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.5rem 0.75rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+  gap: 0.5rem;
+  color: #0f172a;
+}
+
+.payment-modal-header svg {
+  font-size: 1.5rem;
+}
+
+.payment-modal-body {
+  padding: 1.5rem;
+}
+
+.payment-form .form-control {
+  border-radius: 10px;
+  border-color: rgba(15, 23, 42, 0.1);
+  padding: 0.75rem 0.85rem;
+}
+
+.payment-form .btn {
+  border-radius: 12px;
+  padding: 0.85rem;
+  font-weight: 600;
+}
+
+.payment-success-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+}
+
+@keyframes paymentModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

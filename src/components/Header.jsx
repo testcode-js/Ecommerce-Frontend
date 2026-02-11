@@ -9,7 +9,6 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import SearchBar from './SearchBar';
 import Button from './Button';
-import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -50,9 +49,6 @@ const Header = () => {
               </div>
 
               <div className="header-actions">
-                {/* Theme Toggle */}
-                <ThemeToggle />
-
                 {isAuthenticated && (
                   <>
                     {/* Notifications */}
@@ -166,8 +162,8 @@ const Header = () => {
 
       <style>{`
         .modern-header {
-          background: #fff;
-          box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+          background: #ffffff;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
           position: sticky;
           top: 0;
           z-index: 1000;
@@ -175,7 +171,7 @@ const Header = () => {
 
         .header-top {
           padding: 1rem 0;
-          border-bottom: 1px solid #f0f0f0;
+          border-bottom: 1px solid #e2e8f0;
         }
 
         .header-content {
@@ -191,7 +187,7 @@ const Header = () => {
           text-decoration: none;
           font-size: 1.8rem;
           font-weight: 800;
-          color: #2d3436;
+          color: #1e293b;
         }
 
         .logo-text {
@@ -216,7 +212,7 @@ const Header = () => {
           background: none;
           border: none;
           font-size: 1.2rem;
-          color: #636e72;
+          color: #64748b;
           cursor: pointer;
         }
 
@@ -234,8 +230,8 @@ const Header = () => {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: #f8f9fa;
-          color: #636e72;
+          background: #f8fafc;
+          color: #64748b;
           text-decoration: none;
           transition: all 0.3s ease;
         }
@@ -243,7 +239,6 @@ const Header = () => {
         .action-btn:hover {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: #fff;
-          transform: translateY(-2px);
         }
 
         .action-btn .badge {
@@ -265,10 +260,6 @@ const Header = () => {
           animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-          0% {
-            box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
-          }
           70% {
             box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
           }
@@ -292,12 +283,12 @@ const Header = () => {
         }
 
         .btn-outline {
-          border-color: #667eea;
-          color: #667eea;
+          border-color: var(--accent-color);
+          color: var(--accent-color);
         }
 
         .btn-outline:hover {
-          background: #667eea;
+          background: var(--accent-color);
           color: #fff;
         }
 
@@ -320,7 +311,7 @@ const Header = () => {
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
-          background: #f8f9fa;
+          background: var(--bg-secondary);
           border: none;
           border-radius: 25px;
           cursor: pointer;
@@ -336,9 +327,9 @@ const Header = () => {
           position: absolute;
           top: 100%;
           right: 0;
-          background: #fff;
+          background: var(--card-bg);
           border-radius: 12px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+          box-shadow: var(--card-shadow);
           min-width: 200px;
           opacity: 0;
           visibility: hidden;
@@ -358,14 +349,14 @@ const Header = () => {
           align-items: center;
           gap: 0.8rem;
           padding: 0.8rem 1rem;
-          color: #2d3436;
+          color: var(--text-primary);
           text-decoration: none;
           transition: all 0.2s ease;
         }
 
         .dropdown-item:hover {
-          background: #f8f9fa;
-          color: #667eea;
+          background: var(--bg-secondary);
+          color: var(--accent-color);
         }
 
         .dropdown-item.logout {
@@ -378,7 +369,7 @@ const Header = () => {
 
         .dropdown-header {
           padding: 1rem;
-          border-bottom: 1px solid #f0f0f0;
+          border-bottom: 1px solid var(--border-color);
         }
 
         .user-info {
@@ -406,18 +397,18 @@ const Header = () => {
 
         .user-name {
           font-weight: 600;
-          color: #2d3436;
+          color: var(--text-primary);
           font-size: 0.9rem;
         }
 
         .user-email {
-          color: #636e72;
+          color: var(--text-secondary);
           font-size: 0.8rem;
         }
 
         .dropdown-divider {
           height: 1px;
-          background: #f0f0f0;
+          background: var(--border-color);
           margin: 0.5rem 0;
         }
 
@@ -430,7 +421,7 @@ const Header = () => {
           padding: 0.5rem 1rem;
           font-size: 0.75rem;
           font-weight: 600;
-          color: #636e72;
+          color: var(--text-secondary);
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -440,12 +431,12 @@ const Header = () => {
           background: none;
           border: none;
           font-size: 1.5rem;
-          color: #636e72;
+          color: var(--text-secondary);
           cursor: pointer;
         }
 
         .main-nav {
-          background: #fff;
+          background: var(--card-bg);
         }
 
         .nav-links {
@@ -461,7 +452,7 @@ const Header = () => {
           align-items: center;
           gap: 0.5rem;
           padding: 1rem 0;
-          color: #636e72;
+          color: var(--text-secondary);
           text-decoration: none;
           font-weight: 600;
           transition: all 0.3s ease;
@@ -469,7 +460,7 @@ const Header = () => {
         }
 
         .nav-links a:hover {
-          color: #667eea;
+          color: var(--accent-color);
         }
 
         .nav-links a::after {
@@ -510,7 +501,7 @@ const Header = () => {
             left: -100%;
             width: 80%;
             height: 100vh;
-            background: #fff;
+            background: var(--card-bg);
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             transition: left 0.3s ease;
             z-index: 999;
@@ -532,7 +523,7 @@ const Header = () => {
           }
 
           .nav-links a:hover {
-            background: #f8f9fa;
+            background: var(--bg-secondary);
           }
         }
       `}</style>

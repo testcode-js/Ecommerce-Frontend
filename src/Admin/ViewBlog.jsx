@@ -79,7 +79,7 @@ React provides a powerful and flexible way to build modern web applications. By 
         author: 'John Doe',
         tags: ['react', 'javascript', 'web development'],
         category: 'Technology',
-        featuredImage: 'https://via.placeholder.com/800x400',
+        featuredImage: 'https://placehold.co/800x400',
         status: 'published',
         publishDate: '2024-01-16',
         createdAt: '2024-01-15',

@@ -340,7 +340,7 @@ const Dashboard = () => {
             <div className="card-body">
               <div className="recommendation-item d-flex align-items-center mb-3">
                 <img
-                  src="https://via.placeholder.com/60"
+                  src="https://placehold.co/60"
                   alt="Product"
                   className="rounded me-3"
                   style={{ width: '60px', height: '60px', objectFit: 'cover' }}
@@ -354,7 +354,7 @@ const Dashboard = () => {
               
               <div className="recommendation-item d-flex align-items-center">
                 <img
-                  src="https://via.placeholder.com/60"
+                  src="https://placehold.co/60"
                   alt="Product"
                   className="rounded me-3"
                   style={{ width: '60px', height: '60px', objectFit: 'cover' }}

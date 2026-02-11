@@ -147,7 +147,11 @@ const CartDesign = () => {
                   <div className="item-product">
                     <div className="product-image">
                       <img
-                        src={item.image ? `${UPLOADS_URL}/${item.image}` : 'https://via.placeholder.com/80'}
+                        src={
+                          item.image 
+                            ? (item.image.startsWith('http') ? item.image : `${UPLOADS_URL}/${item.image}`) 
+                            : 'https://placehold.co/80'
+                        }
                         alt={item.name}
                       />
                     </div>
