@@ -271,8 +271,6 @@ MIT License - feel free to use this project for learning or commercial purposes.
 
 ---
 
-**Backend Get On This Link: https://github.com/testcode-js/Ecommerce-Backend**
-
 Built with ❤️ using MERN Stack
 
 ## Expanding the ESLint configuration
