@@ -174,9 +174,9 @@ const Card = ({ product }) => {
               className="badge"
               style={{ 
                 background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%)',
-                padding: '6px 12px',
-                borderRadius: '20px',
-                fontSize: '12px',
+                padding: '4px 8px',
+                borderRadius: '12px',
+                fontSize: '10px',
                 fontWeight: '600',
                 boxShadow: '0 2px 8px rgba(238,90,90,0.4)'
               }}
@@ -189,9 +189,9 @@ const Card = ({ product }) => {
               className="badge"
               style={{ 
                 background: 'linear-gradient(135deg, #ffd93d 0%, #ff9500 100%)',
-                padding: '6px 12px',
-                borderRadius: '20px',
-                fontSize: '11px',
+                padding: '4px 8px',
+                borderRadius: '12px',
+                fontSize: '10px',
                 fontWeight: '600',
                 color: '#000'
               }}
@@ -216,8 +216,8 @@ const Card = ({ product }) => {
               style={{ 
                 background: 'rgba(255,255,255,0.95)',
                 color: '#dc3545',
-                padding: '10px 20px',
-                borderRadius: '25px',
+                padding: '8px 16px',
+                borderRadius: '20px',
                 fontWeight: '600'
               }}
             >

@@ -479,20 +479,47 @@ const Header = () => {
         }
 
         @media (max-width: 768px) {
+          .header-content {
+            gap: 1rem;
+            padding: 0 1rem;
+          }
+
+          .logo {
+            font-size: 1.5rem;
+          }
+
           .search-container {
             display: none;
           }
 
           .search-toggle-btn {
             display: block;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.5rem;
+          }
+
+          .header-actions {
+            gap: 0.5rem;
           }
 
           .header-actions .auth-buttons {
             display: none;
           }
 
+          .action-btn {
+            width: 35px;
+            height: 35px;
+            font-size: 0.9rem;
+          }
+
           .mobile-menu-btn {
             display: block;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.5rem;
           }
 
           .main-nav {
@@ -501,10 +528,11 @@ const Header = () => {
             left: -100%;
             width: 80%;
             height: 100vh;
-            background: var(--card-bg);
+            background: #ffffff;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             transition: left 0.3s ease;
             z-index: 999;
+            overflow-y: auto;
           }
 
           .main-nav.open {
@@ -513,17 +541,65 @@ const Header = () => {
 
           .nav-links {
             flex-direction: column;
-            padding: 2rem;
-            gap: 1rem;
+            padding: 2rem 1rem;
+            gap: 0.5rem;
           }
 
           .nav-links a {
             padding: 1rem;
             border-radius: 8px;
+            text-align: left;
+            width: 100%;
+            justify-content: flex-start;
           }
 
           .nav-links a:hover {
-            background: var(--bg-secondary);
+            background: #f8fafc;
+            color: #667eea;
+          }
+
+          .user-dropdown .dropdown-menu {
+            position: fixed;
+            top: 60px;
+            right: 1rem;
+            left: 1rem;
+            width: auto;
+            min-width: 250px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .header-content {
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+          }
+
+          .logo {
+            font-size: 1.3rem;
+          }
+
+          .action-btn {
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+          }
+
+          .main-nav {
+            width: 90%;
+          }
+
+          .nav-links {
+            padding: 1rem 0.5rem;
+          }
+
+          .nav-links a {
+            padding: 0.8rem;
+            font-size: 0.9rem;
+          }
+
+          .user-dropdown .dropdown-menu {
+            right: 0.5rem;
+            left: 0.5rem;
           }
         }
       `}</style>
