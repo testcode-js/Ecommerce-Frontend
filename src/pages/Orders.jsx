@@ -14,7 +14,10 @@ import {
   FaDownload,
   FaSortAmountDown,
   FaSortAmountUp,
-  FaSync
+  FaSync,
+  FaTimes,
+  FaUndo,
+  FaExchangeAlt
 } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
@@ -30,20 +33,66 @@ const Orders = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const { data } = await API.get('/orders/myorders');
-        setOrders(data);
-      } catch (err) {
-        console.error('Fetch orders error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchOrders = async () => {
+    try {
+      const { data } = await API.get('/orders/myorders');
+      setOrders(data);
+    } catch (err) {
+      console.error('Fetch orders error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchOrders();
   }, []);
+
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+    
+    try {
+      await API.put(`/orders/${orderId}/cancel`);
+      alert('Order cancelled successfully');
+      fetchOrders();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to cancel order');
+    }
+  };
+
+  const handleReturnOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to return this order?')) return;
+    
+    try {
+      await API.put(`/orders/${orderId}/return`);
+      alert('Return request submitted successfully');
+      fetchOrders();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to request return');
+    }
+  };
+
+  const handleReplaceOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to request a replacement?')) return;
+    
+    try {
+      await API.put(`/orders/${orderId}/replace`);
+      alert('Replacement request submitted successfully');
+      fetchOrders();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to request replacement');
+    }
+  };
+
+  const canCancel = (status) => {
+    const s = status?.toLowerCase();
+    return s === 'pending' || s === 'processing';
+  };
+
+  const canReturnOrReplace = (status) => {
+    const s = status?.toLowerCase();
+    return s === 'delivered';
+  };
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -397,13 +446,36 @@ const Orders = () => {
                           {order.isPaid ? 'Paid' : 'Pending'}
                         </span>
                       </div>
-                      <Link 
-                        to={`/order/${order._id}`} 
-                        className="btn btn-sm btn-outline-primary"
-                      >
-                        <FaEye className="me-1" />
-                        View Details
-                      </Link>
+                      <div className="d-flex gap-2">
+                        {canCancel(order.status) && (
+                          <Button
+                            title={<><FaTimes className="me-1" /> Cancel</>}
+                            onClick={() => handleCancelOrder(order._id)}
+                            className="btn-outline-danger btn-sm"
+                          />
+                        )}
+                        {canReturnOrReplace(order.status) && (
+                          <>
+                            <Button
+                              title={<><FaUndo className="me-1" /> Return</>}
+                              onClick={() => handleReturnOrder(order._id)}
+                              className="btn-outline-warning btn-sm"
+                            />
+                            <Button
+                              title={<><FaExchangeAlt className="me-1" /> Replace</>}
+                              onClick={() => handleReplaceOrder(order._id)}
+                              className="btn-outline-info btn-sm"
+                            />
+                          </>
+                        )}
+                        <Link 
+                          to={`/order/${order._id}`} 
+                          className="btn btn-sm btn-outline-primary"
+                        >
+                          <FaEye className="me-1" />
+                          View Details
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

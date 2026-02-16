@@ -105,10 +105,6 @@ const ProductDetail = () => {
     }
   };
 
-  const handleGenerateInvoice = () => {
-    navigate(`/invoice/${product._id}`);
-  };
-
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
@@ -238,14 +234,6 @@ const ProductDetail = () => {
             <button className={`btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}`} onClick={handleToggleWishlist}>
               {inWishlist ? <FaHeart className="me-2" /> : <FaRegHeart className="me-2" />}
               {inWishlist ? 'In Wishlist' : 'Add to Wishlist'}
-            </button>
-            <button 
-              className="btn btn-outline-info"
-              onClick={handleGenerateInvoice}
-              title="Generate Invoice"
-            >
-              <FaFileInvoice className="me-2" />
-              Invoice
             </button>
           </div>
 

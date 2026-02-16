@@ -13,11 +13,12 @@ import {
   FaDownload,
   FaPrint,
   FaHeadset,
-  FaRedo,
   FaPhone,
   FaEnvelope,
   FaShieldAlt,
-  FaUndo
+  FaUndo,
+  FaExchangeAlt,
+  FaRedo
 } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
@@ -105,29 +106,55 @@ const OrderDetail = () => {
     }));
   };
 
-  const handleDownloadInvoice = () => {
-    // Simulate invoice download
-    const invoiceData = {
-      orderId: order._id,
-      date: order.createdAt,
-      items: order.orderItems,
-      total: order.totalPrice,
-      shippingAddress: order.shippingAddress
-    };
-    
-    const dataStr = JSON.stringify(invoiceData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `invoice_${order._id.slice(-8)}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
+  const handleDownloadInvoice = async () => {
+    try {
+      const response = await API.get(`/orders/${order._id}/invoice`, {
+        responseType: 'blob',
+      });
 
-  const handlePrintOrder = () => {
-    window.print();
+      const contentType = response.headers?.['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        const text = await response.data.text();
+        let message = 'Failed to download invoice';
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed?.message || message;
+        } catch (_) {
+          // ignore JSON parse failure
+        }
+        alert(message);
+        return;
+      }
+
+      if (!contentType.includes('application/pdf')) {
+        alert('Invoice download failed (unexpected response type)');
+        return;
+      }
+
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Invoice_${order._id.slice(-8).toUpperCase()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading invoice:', err);
+      try {
+        const blob = err.response?.data;
+        const contentType = err.response?.headers?.['content-type'] || '';
+        if (blob && typeof blob.text === 'function' && contentType.includes('application/json')) {
+          const text = await blob.text();
+          const parsed = JSON.parse(text);
+          alert(parsed?.message || 'Failed to download invoice');
+          return;
+        }
+      } catch (_) {
+        // ignore
+      }
+      alert('Failed to download invoice');
+    }
   };
 
   const handleReorder = async () => {
@@ -167,21 +194,55 @@ const OrderDetail = () => {
   };
 
   const handleCancelOrder = async () => {
-    if (window.confirm('Are you sure you want to cancel this order?')) {
-      try {
-        await API.put(`/orders/${order._id}/cancel`);
-        // Refresh order data
-        const { data } = await API.get(`/orders/${id}`);
-        setOrder(data);
-      } catch (error) {
-        console.error('Cancel order error:', error);
-      }
+    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+    
+    try {
+      await API.put(`/orders/${order._id}/cancel`);
+      alert('Order cancelled successfully');
+      const { data } = await API.get(`/orders/${id}`);
+      setOrder(data);
+    } catch (error) {
+      console.error('Cancel order error:', error);
+      alert(error.response?.data?.message || 'Failed to cancel order');
     }
   };
 
-  const handleRequestReturn = () => {
-    // Implement return request logic
-    window.location.href = `/returns/${order._id}`;
+  const handleReturnOrder = async () => {
+    if (!window.confirm('Are you sure you want to return this order?')) return;
+    
+    try {
+      await API.put(`/orders/${order._id}/return`);
+      alert('Return request submitted successfully');
+      const { data } = await API.get(`/orders/${id}`);
+      setOrder(data);
+    } catch (error) {
+      console.error('Return order error:', error);
+      alert(error.response?.data?.message || 'Failed to request return');
+    }
+  };
+
+  const handleReplaceOrder = async () => {
+    if (!window.confirm('Are you sure you want to request a replacement?')) return;
+    
+    try {
+      await API.put(`/orders/${order._id}/replace`);
+      alert('Replacement request submitted successfully');
+      const { data } = await API.get(`/orders/${id}`);
+      setOrder(data);
+    } catch (error) {
+      console.error('Replace order error:', error);
+      alert(error.response?.data?.message || 'Failed to request replacement');
+    }
+  };
+
+  const canCancel = (status) => {
+    const s = status?.toLowerCase();
+    return s === 'pending' || s === 'processing';
+  };
+
+  const canReturnOrReplace = (status) => {
+    const s = status?.toLowerCase();
+    return s === 'delivered';
   };
 
   if (loading) return <Loading message="Loading order details..." />;
@@ -359,23 +420,25 @@ const OrderDetail = () => {
                   className="btn-outline-primary"
                 />
                 <Button
-                  title={<><FaPrint className="me-2" />Print Order</>}
-                  onClick={handlePrintOrder}
-                  className="btn-outline-secondary"
-                />
-                <Button
                   title={<><FaHeadset className="me-2" />Need Help?</>}
                   onClick={() => setShowSupport(!showSupport)}
                   className="btn-outline-info"
                 />
-                {order.status === 'Delivered' && (
-                  <Button
-                    title={<><FaUndo className="me-2" />Request Return</>}
-                    onClick={handleRequestReturn}
-                    className="btn-outline-warning"
-                  />
+                {canReturnOrReplace(order.status) && (
+                  <>
+                    <Button
+                      title={<><FaUndo className="me-2" />Return Order</>}
+                      onClick={handleReturnOrder}
+                      className="btn-outline-warning"
+                    />
+                    <Button
+                      title={<><FaExchangeAlt className="me-2" />Replace Order</>}
+                      onClick={handleReplaceOrder}
+                      className="btn-outline-info"
+                    />
+                  </>
                 )}
-                {order.status === 'Pending' && (
+                {canCancel(order.status) && (
                   <Button
                     title={<><FaTimesCircle className="me-2" />Cancel Order</>}
                     onClick={handleCancelOrder}

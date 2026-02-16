@@ -181,12 +181,6 @@ const AdminDashboard = () => {
                   <div>
                     <h6 className="text-muted mb-2">{stat.title}</h6>
                     <h3 className="mb-0">{stat.value}</h3>
-                    {stat.change !== null && (
-                      <div className={`d-flex align-items-center mt-2 ${stat.change >= 0 ? 'text-success' : 'text-danger'}`}>
-                        {stat.change >= 0 ? <FaArrowUp className="me-1" /> : <FaArrowDown className="me-1" />}
-                        <small>{stat.change >= 0 ? '+' : ''}{stat.change}% vs last month</small>
-                      </div>
-                    )}
                   </div>
                   <div className={`stat-icon ${stat.color}`}>
                     <stat.icon />

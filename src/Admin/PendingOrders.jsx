@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaClock, FaUser, FaBox, FaRupeeSign, FaEye, FaCheck, FaTimes, FaSearch } from 'react-icons/fa';
+import { FaClock, FaUser, FaBox, FaRupeeSign, FaEye, FaCheck, FaTimes, FaSearch, FaFileInvoice } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
 import './AdminLayout.css';
@@ -79,6 +79,56 @@ const PendingOrders = () => {
   const handleRejectOrder = (orderId) => {
     console.log('Reject order:', orderId);
     // API call to reject order
+  };
+
+  const downloadInvoice = async (orderId) => {
+    try {
+      const response = await API.get(`/orders/${orderId}/invoice`, {
+        responseType: 'blob',
+      });
+
+      const contentType = response.headers?.['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        const text = await response.data.text();
+        let message = 'Failed to download invoice';
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed?.message || message;
+        } catch (_) {
+          // ignore JSON parse failure
+        }
+        alert(message);
+        return;
+      }
+
+      if (!contentType.includes('application/pdf')) {
+        alert('Invoice download failed (unexpected response type)');
+        return;
+      }
+
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Invoice_${orderId.slice(-8).toUpperCase()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      try {
+        const blob = err.response?.data;
+        const contentType = err.response?.headers?.['content-type'] || '';
+        if (blob && typeof blob.text === 'function' && contentType.includes('application/json')) {
+          const text = await blob.text();
+          const parsed = JSON.parse(text);
+          alert(parsed?.message || 'Failed to download invoice');
+          return;
+        }
+      } catch (_) {
+        // ignore
+      }
+      alert('Failed to download invoice');
+    }
   };
 
   if (loading) {
@@ -214,6 +264,9 @@ const PendingOrders = () => {
                         </button>
                         <button className="btn btn-sm btn-outline-primary">
                           <FaEye />
+                        </button>
+                        <button className="btn btn-sm btn-outline-info" onClick={() => downloadInvoice(order._id)} title="Download Invoice">
+                          <FaFileInvoice />
                         </button>
                         <button className="btn btn-sm btn-outline-danger" onClick={() => handleRejectOrder(order._id)}>
                           <FaTimes />

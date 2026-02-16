@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEye, FaCheck, FaTruck, FaTimes, FaFilter } from 'react-icons/fa';
+import { FaEye, FaCheck, FaTruck, FaFilter, FaFileInvoice } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
 
@@ -49,6 +49,44 @@ const ManageOrders = () => {
       fetchOrders();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to mark as delivered');
+    }
+  };
+
+  const downloadInvoice = async (orderId) => {
+    try {
+      const response = await API.get(`/orders/${orderId}/invoice`, {
+        responseType: 'blob',
+      });
+
+      const contentType = response.headers?.['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        const text = await response.data.text();
+        let message = 'Failed to download invoice';
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed?.message || message;
+        } catch (_) {
+          // ignore JSON parse failure
+        }
+        alert(message);
+        return;
+      }
+
+      if (!contentType.includes('application/pdf')) {
+        alert('Invoice download failed (unexpected response type)');
+        return;
+      }
+
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Invoice_${orderId.slice(-8).toUpperCase()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to download invoice');
     }
   };
 
@@ -155,13 +193,20 @@ const ManageOrders = () => {
                   <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                   <td>
                     <div className="d-flex gap-1">
-                      <Link 
-                        to={`/order/${order._id}`} 
+                      <Link
+                        to={`/order/${order._id}`}
                         className="btn btn-sm btn-outline-primary"
                         title="View Details"
                       >
                         <FaEye />
                       </Link>
+                      <button
+                        className="btn btn-sm btn-outline-info"
+                        onClick={() => downloadInvoice(order._id)}
+                        title="Download Invoice"
+                      >
+                        <FaFileInvoice />
+                      </button>
                       {!order.isDelivered && order.status === 'Shipped' && (
                         <button
                           className="btn btn-sm btn-outline-success"
