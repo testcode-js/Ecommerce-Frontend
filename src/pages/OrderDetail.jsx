@@ -18,7 +18,8 @@ import {
   FaShieldAlt,
   FaUndo,
   FaExchangeAlt,
-  FaRedo
+  FaRedo,
+  FaEye
 } from 'react-icons/fa';
 import API from '../api/axios';
 import Loading from '../components/Loading';
@@ -106,6 +107,26 @@ const OrderDetail = () => {
     }));
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString();
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+
   const handleDownloadInvoice = async () => {
     try {
       const response = await API.get(`/orders/${order._id}/invoice`, {
@@ -154,6 +175,35 @@ const OrderDetail = () => {
         // ignore
       }
       alert('Failed to download invoice');
+    }
+  };
+
+  const handleViewInvoice = async () => {
+    try {
+      const response = await API.get(`/orders/${order._id}/invoice`, {
+        responseType: 'blob',
+      });
+
+      const contentType = response.headers?.['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        const text = await response.data.text();
+        alert('Failed to view invoice');
+        return;
+      }
+
+      if (!contentType.includes('application/pdf')) {
+        alert('Invoice view failed (unexpected response type)');
+        return;
+      }
+
+      const url = window.URL.createObjectURL(response.data);
+      window.open(url, '_blank');
+      
+      // Note: We can't revoke the object URL immediately if we want the new tab to use it.
+      // It will be cleared when the document is unloaded.
+    } catch (err) {
+      console.error('Error viewing invoice:', err);
+      alert('Failed to view invoice');
     }
   };
 
@@ -264,8 +314,22 @@ const OrderDetail = () => {
       </Link>
 
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Order #{order._id.slice(-8).toUpperCase()}</h2>
-        <span className={`badge ${getStatusBadge(order.status)} fs-6`}>{order.status}</span>
+        <div>
+          <h2 className="mb-0">Order #{order._id?.slice(-8).toUpperCase() || 'N/A'}</h2>
+          <span className={`badge ${getStatusBadge(order.status)} fs-6`}>{order.status}</span>
+        </div>
+        <div className="d-flex gap-2">
+            <Button
+              title={<><FaEye className="me-2" /> View Invoice</>}
+              onClick={handleViewInvoice}
+              className="btn-outline-primary"
+            />
+            <Button
+              title={<><FaDownload className="me-2" /> Download</>}
+              onClick={handleDownloadInvoice}
+              className="btn-primary"
+            />
+        </div>
       </div>
 
       {/* Order Progress */}
@@ -484,7 +548,7 @@ const OrderDetail = () => {
               <p className="mb-0">
                 <span className="text-muted">Status:</span>{' '}
                 <span className={`badge ${order.isPaid ? 'bg-success' : 'bg-warning'}`}>
-                  {order.isPaid ? `Paid on ${new Date(order.paidAt).toLocaleDateString()}` : 'Not Paid'}
+                  {order.isPaid ? `Paid on ${formatDate(order.paidAt)}` : 'Not Paid'}
                 </span>
               </p>
             </div>
@@ -501,7 +565,7 @@ const OrderDetail = () => {
                 <span className="text-muted">Status:</span>{' '}
                 <span className={`badge ${order.isDelivered ? 'bg-success' : 'bg-info'}`}>
                   {order.isDelivered
-                    ? `Delivered on ${new Date(order.deliveredAt).toLocaleDateString()}`
+                    ? `Delivered on ${formatDate(order.deliveredAt)}`
                     : 'In Progress'}
                 </span>
               </p>
@@ -539,7 +603,7 @@ const OrderDetail = () => {
       </div>
 
       <div className="text-muted mt-4">
-        <small>Order placed on: {new Date(order.createdAt).toLocaleString()}</small>
+        <small>Order placed on: {formatDateTime(order.createdAt)}</small>
       </div>
     </div>
   );
