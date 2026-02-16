@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   FaBox, 
   FaMapMarkerAlt, 
@@ -10,8 +10,6 @@ import {
   FaClock,
   FaExclamationTriangle,
   FaTimesCircle,
-  FaDownload,
-  FaPrint,
   FaHeadset,
   FaPhone,
   FaEnvelope,
@@ -29,6 +27,7 @@ const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL;
 
 const OrderDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showSupport, setShowSupport] = useState(false);
@@ -127,84 +126,12 @@ const OrderDetail = () => {
     }
   };
 
-  const handleDownloadInvoice = async () => {
-    try {
-      const response = await API.get(`/orders/${order._id}/invoice`, {
-        responseType: 'blob',
-      });
-
-      const contentType = response.headers?.['content-type'] || '';
-      if (contentType.includes('application/json')) {
-        const text = await response.data.text();
-        let message = 'Failed to download invoice';
-        try {
-          const parsed = JSON.parse(text);
-          message = parsed?.message || message;
-        } catch (_) {
-          // ignore JSON parse failure
-        }
-        alert(message);
-        return;
-      }
-
-      if (!contentType.includes('application/pdf')) {
-        alert('Invoice download failed (unexpected response type)');
-        return;
-      }
-
-      const url = window.URL.createObjectURL(response.data);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Invoice_${order._id.slice(-8).toUpperCase()}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error downloading invoice:', err);
-      try {
-        const blob = err.response?.data;
-        const contentType = err.response?.headers?.['content-type'] || '';
-        if (blob && typeof blob.text === 'function' && contentType.includes('application/json')) {
-          const text = await blob.text();
-          const parsed = JSON.parse(text);
-          alert(parsed?.message || 'Failed to download invoice');
-          return;
-        }
-      } catch (_) {
-        // ignore
-      }
-      alert('Failed to download invoice');
-    }
+  const handleGoToReturn = () => {
+    navigate(`/order/${order._id}/return`);
   };
 
-  const handleViewInvoice = async () => {
-    try {
-      const response = await API.get(`/orders/${order._id}/invoice`, {
-        responseType: 'blob',
-      });
-
-      const contentType = response.headers?.['content-type'] || '';
-      if (contentType.includes('application/json')) {
-        const text = await response.data.text();
-        alert('Failed to view invoice');
-        return;
-      }
-
-      if (!contentType.includes('application/pdf')) {
-        alert('Invoice view failed (unexpected response type)');
-        return;
-      }
-
-      const url = window.URL.createObjectURL(response.data);
-      window.open(url, '_blank');
-      
-      // Note: We can't revoke the object URL immediately if we want the new tab to use it.
-      // It will be cleared when the document is unloaded.
-    } catch (err) {
-      console.error('Error viewing invoice:', err);
-      alert('Failed to view invoice');
-    }
+  const handleGoToReplace = () => {
+    navigate(`/order/${order._id}/replace`);
   };
 
   const handleReorder = async () => {
@@ -257,33 +184,8 @@ const OrderDetail = () => {
     }
   };
 
-  const handleReturnOrder = async () => {
-    if (!window.confirm('Are you sure you want to return this order?')) return;
-    
-    try {
-      await API.put(`/orders/${order._id}/return`);
-      alert('Return request submitted successfully');
-      const { data } = await API.get(`/orders/${id}`);
-      setOrder(data);
-    } catch (error) {
-      console.error('Return order error:', error);
-      alert(error.response?.data?.message || 'Failed to request return');
-    }
-  };
-
-  const handleReplaceOrder = async () => {
-    if (!window.confirm('Are you sure you want to request a replacement?')) return;
-    
-    try {
-      await API.put(`/orders/${order._id}/replace`);
-      alert('Replacement request submitted successfully');
-      const { data } = await API.get(`/orders/${id}`);
-      setOrder(data);
-    } catch (error) {
-      console.error('Replace order error:', error);
-      alert(error.response?.data?.message || 'Failed to request replacement');
-    }
-  };
+  const isReturnRequested = !!order?.returnRequest?.requested;
+  const isReplaceRequested = !!order?.replaceRequest?.requested;
 
   const canCancel = (status) => {
     const s = status?.toLowerCase();
@@ -318,18 +220,7 @@ const OrderDetail = () => {
           <h2 className="mb-0">Order #{order._id?.slice(-8).toUpperCase() || 'N/A'}</h2>
           <span className={`badge ${getStatusBadge(order.status)} fs-6`}>{order.status}</span>
         </div>
-        <div className="d-flex gap-2">
-            <Button
-              title={<><FaEye className="me-2" /> View Invoice</>}
-              onClick={handleViewInvoice}
-              className="btn-outline-primary"
-            />
-            <Button
-              title={<><FaDownload className="me-2" /> Download</>}
-              onClick={handleDownloadInvoice}
-              className="btn-primary"
-            />
-        </div>
+        <div />
       </div>
 
       {/* Order Progress */}
@@ -479,11 +370,6 @@ const OrderDetail = () => {
             <div className="card-body">
               <div className="d-grid gap-2">
                 <Button
-                  title={<><FaDownload className="me-2" />Download Invoice</>}
-                  onClick={handleDownloadInvoice}
-                  className="btn-outline-primary"
-                />
-                <Button
                   title={<><FaHeadset className="me-2" />Need Help?</>}
                   onClick={() => setShowSupport(!showSupport)}
                   className="btn-outline-info"
@@ -492,13 +378,15 @@ const OrderDetail = () => {
                   <>
                     <Button
                       title={<><FaUndo className="me-2" />Return Order</>}
-                      onClick={handleReturnOrder}
+                      onClick={handleGoToReturn}
                       className="btn-outline-warning"
+                      disabled={isReturnRequested}
                     />
                     <Button
                       title={<><FaExchangeAlt className="me-2" />Replace Order</>}
-                      onClick={handleReplaceOrder}
+                      onClick={handleGoToReplace}
                       className="btn-outline-info"
+                      disabled={isReplaceRequested}
                     />
                   </>
                 )}

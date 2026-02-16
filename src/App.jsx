@@ -15,6 +15,8 @@ import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
+import ReturnOrder from './pages/ReturnOrder';
+import ReplaceOrder from './pages/ReplaceOrder';
 import UserWishlist from './pages/UserWishlist';
 import Profile from './pages/Profile';
 import Categories from './pages/Categories';
@@ -95,6 +97,8 @@ const App = () => {
         <Route path="order-success/:id" element={<UserRoute><OrderSuccess /></UserRoute>} />
         <Route path="orders" element={<UserRoute><Orders /></UserRoute>} />
         <Route path="order/:id" element={<UserRoute><OrderDetail /></UserRoute>} />
+        <Route path="order/:id/return" element={<UserRoute><ReturnOrder /></UserRoute>} />
+        <Route path="order/:id/replace" element={<UserRoute><ReplaceOrder /></UserRoute>} />
         <Route path="wishlist" element={<Navigate to="/user/wishlist" replace />} />
         <Route path="user/cart" element={<UserRoute><UserCart /></UserRoute>} />
         <Route path="user/wishlist" element={<UserRoute><UserWishlist /></UserRoute>} />

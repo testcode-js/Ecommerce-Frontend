@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   FaEye, 
   FaBox, 
@@ -11,7 +11,6 @@ import {
   FaClock,
   FaTimesCircle,
   FaExclamationTriangle,
-  FaDownload,
   FaSortAmountDown,
   FaSortAmountUp,
   FaSync,
@@ -24,6 +23,7 @@ import Loading from '../components/Loading';
 import Button from '../components/Button';
 
 const Orders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,28 +60,12 @@ const Orders = () => {
     }
   };
 
-  const handleReturnOrder = async (orderId) => {
-    if (!window.confirm('Are you sure you want to return this order?')) return;
-    
-    try {
-      await API.put(`/orders/${orderId}/return`);
-      alert('Return request submitted successfully');
-      fetchOrders();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to request return');
-    }
+  const handleReturnOrder = (orderId) => {
+    navigate(`/order/${orderId}/return`);
   };
 
-  const handleReplaceOrder = async (orderId) => {
-    if (!window.confirm('Are you sure you want to request a replacement?')) return;
-    
-    try {
-      await API.put(`/orders/${orderId}/replace`);
-      alert('Replacement request submitted successfully');
-      fetchOrders();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to request replacement');
-    }
+  const handleReplaceOrder = (orderId) => {
+    navigate(`/order/${orderId}/replace`);
   };
 
   const canCancel = (status) => {
@@ -341,14 +325,6 @@ const Orders = () => {
         <span className="text-muted">
           Showing {filteredOrders.length} of {orders.length} orders
         </span>
-        {filteredOrders.length > 0 && (
-          <Button
-            title={<FaDownload />}
-            className="btn-outline-primary"
-          >
-            Export
-          </Button>
-        )}
       </div>
 
       {/* Orders List */}
