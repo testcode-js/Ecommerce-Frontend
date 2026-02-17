@@ -86,11 +86,11 @@ const Footer = () => {
               </div>
               <div className="contact-item">
                 <FaPhone />
-                <span>+91 98765 43210</span>
+                <span>+91 43210 23045</span>
               </div>
               <div className="contact-item">
                 <FaMapMarkerAlt />
-                <span>123 Business Ave, Mumbai, India</span>
+                <span>123 Business Ave, Borivali,  Mumbai, India</span>
               </div>
             </div>
           </div>
@@ -484,5 +484,6 @@ const Footer = () => {
     </>
   );
 };
+
 
 export default Footer;
